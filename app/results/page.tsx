@@ -83,88 +83,92 @@ interface MockData {
   overallScore: number;
 }
 
-
-const sampleInputs: BusinessInputs = {
-  // Business Information
-  businessName: "Tech Startup Co.",
-  description: "A technology company focused on innovative solutions",
-  revenueModel: "Subscription-based SaaS model",
-
-  // Target Users & Problems
-  targetUsers: "Small to medium businesses",
-  painPoint: "Inefficient business processes",
-  solution: "Cloud-based management platform",
-
-  // Business Strategy
-  competitors: "Traditional software providers",
-  usp: "User-friendly interface and AI-powered features",
-  goToMarket: "Direct sales and partnerships",
-
-  // Financial and Operations
-  costStructure: "Cloud infrastructure and development costs",
-  breakEvenPoint: "12 months with 1000 subscribers",
-  keyMetrics: "Monthly recurring revenue, churn rate",
-  resourcesNeeded: "Development team, sales team, marketing budget"
-};
-
-
 export default function Results() {
   const theme = useTheme();
   const router = useRouter();
   const [aiAnalysis, setAiAnalysis] = React.useState<AIAnalysisResult | null>(null);
   const [isLoading, setIsLoading] = React.useState(true);
-
-  const initialScores = calculateOverallScore(sampleInputs);
-  const [scores, setScores] = React.useState(initialScores);
+  const [formData, setFormData] = React.useState<BusinessInputs | null>(null);
+  const [scores, setScores] = React.useState({
+    marketScore: 0,
+    financialScore: 0,
+    operationalScore: 0
+  });
   const [mockData, setMockData] = React.useState<MockData>({
-    businessName: sampleInputs.businessName,
-    description: sampleInputs.description,
-    targetUsers: sampleInputs.targetUsers,
-    solution: sampleInputs.solution,
-    marketScore: initialScores.marketScore,
-    financialScore: initialScores.financialScore,
-    operationalScore: initialScores.operationalScore,
-    overallScore: Math.round(
-      (initialScores.marketScore * 0.35) +
-      (initialScores.financialScore * 0.40) +
-      (initialScores.operationalScore * 0.25)
-    ),
+    businessName: '',
+    description: '',
+    targetUsers: '',
+    solution: '',
+    marketScore: 0,
+    financialScore: 0,
+    operationalScore: 0,
+    overallScore: 0
   });
 
+  // Load form data from localStorage
   React.useEffect(() => {
-    const fetchAIAnalysis = async () => {
+    const savedData = localStorage.getItem('businessEvaluationForm');
+    if (savedData) {
       try {
-        const analysis = await analyzeBusinessWithAI(sampleInputs, {
-          marketScore: scores.marketScore,
-          financialScore: scores.financialScore,
-          operationalScore: scores.operationalScore
-        });
-        setAiAnalysis(analysis);
-        if (analysis?.adjustedScores) {
-          setMockData(prev => ({
-            ...prev,
-            marketScore: analysis.adjustedScores.marketScore,
-            financialScore: analysis.adjustedScores.financialScore,
-            operationalScore: analysis.adjustedScores.operationalScore,
-            overallScore: Math.round(
-              (analysis.adjustedScores.marketScore * 0.35) +
-              (analysis.adjustedScores.financialScore * 0.40) +
-              (analysis.adjustedScores.operationalScore * 0.25)
-            ),
-          }));
-        }
+        const parsedData = JSON.parse(savedData);
+        setFormData(parsedData);
       } catch (error) {
-        console.error('Error fetching AI analysis:', error);
-      } finally {
-        setIsLoading(false);
+        console.error('Error loading saved form data:', error);
+        router.push('/evaluate');
       }
-    };
+    } else {
+      router.push('/evaluate');
+    }
+  }, [router]);
 
-    fetchAIAnalysis();
+  // Calculate scores when form data is loaded
+  React.useEffect(() => {
+    if (formData) {
+      const calculatedScores = calculateOverallScore(formData);
+      setScores(calculatedScores);
+      setMockData({
+        businessName: formData.name,
+        description: formData.description,
+        targetUsers: formData.targetUsers,
+        solution: formData.solution,
+        marketScore: calculatedScores.marketScore,
+        financialScore: calculatedScores.financialScore,
+        operationalScore: calculatedScores.operationalScore,
+        overallScore: Math.round(
+          (calculatedScores.marketScore * 0.35) +
+          (calculatedScores.financialScore * 0.40) +
+          (calculatedScores.operationalScore * 0.25)
+        ),
+      });
 
+      // Fetch AI analysis
+      const fetchAIAnalysis = async () => {
+        try {
+          const analysis = await analyzeBusinessWithAI(formData, calculatedScores);
+          setAiAnalysis(analysis);
+          if (analysis?.adjustedScores) {
+            setMockData(prev => ({
+              ...prev,
+              marketScore: analysis.adjustedScores.marketScore,
+              financialScore: analysis.adjustedScores.financialScore,
+              operationalScore: analysis.adjustedScores.operationalScore,
+              overallScore: Math.round(
+                (analysis.adjustedScores.marketScore * 0.35) +
+                (analysis.adjustedScores.financialScore * 0.40) +
+                (analysis.adjustedScores.operationalScore * 0.25)
+              ),
+            }));
+          }
+        } catch (error) {
+          console.error('Error fetching AI analysis:', error);
+        } finally {
+          setIsLoading(false);
+        }
+      };
 
-    console.log("=====sampleInputs", sampleInputs);
-  }, [sampleInputs]);
+      fetchAIAnalysis();
+    }
+  }, [formData]);
 
   // Monthly projection data
   const monthlyData: MonthlyData = {
@@ -724,7 +728,7 @@ export default function Results() {
                   }
                   title={
                     <Typography variant="h6" sx={{ color: 'white' }}>
-                      ข้อมูลการเงินและการดำเนินงาน
+                      คำแนะนำในการดำเนินงาน
                     </Typography>
                   }
                 />
@@ -732,43 +736,87 @@ export default function Results() {
                   <Grid container spacing={2}>
                     <Grid item xs={12}>
                       <Typography variant="subtitle1" sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>
-                        รูปแบบรายได้
+                        รูปแบบรายได้ที่แนะนำ
                       </Typography>
-                      <Typography variant="h6" sx={{ color: 'white' }}>
-                        {sampleInputs.revenueModel}
-                      </Typography>
-                    </Grid>
-                    <Grid item xs={12}>
-                      <Divider sx={{ my: 1, borderColor: 'rgba(255, 255, 255, 0.1)' }} />
-                    </Grid>
-                    <Grid item xs={12}>
-                      <Typography variant="subtitle1" sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>
-                        โครงสร้างต้นทุน
-                      </Typography>
-                      <Typography variant="h6" sx={{ color: 'white' }}>
-                        {sampleInputs.costStructure}
-                      </Typography>
-                    </Grid>
-                    <Grid item xs={12}>
-                      <Divider sx={{ my: 1, borderColor: 'rgba(255, 255, 255, 0.1)' }} />
-                    </Grid>
-                    <Grid item xs={12}>
-                      <Typography variant="subtitle1" sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>
-                        จุดคุ้มทุน
-                      </Typography>
-                      <Typography variant="h6" sx={{ color: 'white' }}>
-                        {sampleInputs.breakEvenPoint}
+                      <Typography variant="body1" sx={{ color: 'white', mt: 1 }}>
+                        {formData?.revenueModel ? (
+                          <>
+                            <strong>รูปแบบปัจจุบัน:</strong> {formData.revenueModel}
+                            <br />
+                            <strong>คำแนะนำ:</strong> พิจารณาเพิ่มช่องทางรายได้เสริม เช่น:
+                            <ul>
+                              <li>บริการเสริมที่เกี่ยวข้อง</li>
+                              <li>แพ็คเกจพิเศษสำหรับลูกค้าประจำ</li>
+                              <li>การขายสินค้าที่เกี่ยวข้อง</li>
+                            </ul>
+                          </>
+                        ) : 'ไม่พบข้อมูล'}
                       </Typography>
                     </Grid>
                     <Grid item xs={12}>
-                      <Divider sx={{ my: 1, borderColor: 'rgba(255, 255, 255, 0.1)' }} />
+                      <Divider sx={{ my: 2, borderColor: 'rgba(255, 255, 255, 0.1)' }} />
                     </Grid>
                     <Grid item xs={12}>
                       <Typography variant="subtitle1" sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>
-                        ตัวชี้วัดสำคัญ
+                        การจัดการต้นทุน
                       </Typography>
-                      <Typography variant="h6" sx={{ color: 'white' }}>
-                        {sampleInputs.keyMetrics}
+                      <Typography variant="body1" sx={{ color: 'white', mt: 1 }}>
+                        {formData?.costStructure ? (
+                          <>
+                            <strong>โครงสร้างปัจจุบัน:</strong> {formData.costStructure}
+                            <br />
+                            <strong>คำแนะนำ:</strong>
+                            <ul>
+                              <li>วิเคราะห์ต้นทุนแปรผันและต้นทุนคงที่</li>
+                              <li>หาพาร์ทเนอร์เพื่อลดต้นทุนการดำเนินงาน</li>
+                              <li>พิจารณาใช้เทคโนโลยีเพื่อเพิ่มประสิทธิภาพ</li>
+                            </ul>
+                          </>
+                        ) : 'ไม่พบข้อมูล'}
+                      </Typography>
+                    </Grid>
+                    <Grid item xs={12}>
+                      <Divider sx={{ my: 2, borderColor: 'rgba(255, 255, 255, 0.1)' }} />
+                    </Grid>
+                    <Grid item xs={12}>
+                      <Typography variant="subtitle1" sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>
+                        การวางแผนจุดคุ้มทุน
+                      </Typography>
+                      <Typography variant="body1" sx={{ color: 'white', mt: 1 }}>
+                        {formData?.breakEvenPoint ? (
+                          <>
+                            <strong>จุดคุ้มทุนปัจจุบัน:</strong> {formData.breakEvenPoint}
+                            <br />
+                            <strong>คำแนะนำ:</strong>
+                            <ul>
+                              <li>ตั้งเป้าหมายยอดขายต่อเดือนให้ชัดเจน</li>
+                              <li>วางแผนการตลาดเพื่อเร่งการเข้าถึงจุดคุ้มทุน</li>
+                              <li>พิจารณาลดต้นทุนเพื่อลดระยะเวลาถึงจุดคุ้มทุน</li>
+                            </ul>
+                          </>
+                        ) : 'ไม่พบข้อมูล'}
+                      </Typography>
+                    </Grid>
+                    <Grid item xs={12}>
+                      <Divider sx={{ my: 2, borderColor: 'rgba(255, 255, 255, 0.1)' }} />
+                    </Grid>
+                    <Grid item xs={12}>
+                      <Typography variant="subtitle1" sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>
+                        ตัวชี้วัดความสำเร็จ
+                      </Typography>
+                      <Typography variant="body1" sx={{ color: 'white', mt: 1 }}>
+                        {formData?.keyMetrics ? (
+                          <>
+                            <strong>ตัวชี้วัดปัจจุบัน:</strong> {formData.keyMetrics}
+                            <br />
+                            <strong>คำแนะนำ:</strong>
+                            <ul>
+                              <li>ติดตามตัวชี้วัดหลัก (KPIs) อย่างสม่ำเสมอ</li>
+                              <li>ตั้งเป้าหมายที่วัดผลได้ชัดเจน</li>
+                              <li>ปรับปรุงกระบวนการตามผลการวัด</li>
+                            </ul>
+                          </>
+                        ) : 'ไม่พบข้อมูล'}
                       </Typography>
                     </Grid>
                   </Grid>

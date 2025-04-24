@@ -63,8 +63,35 @@ export default function Evaluate() {
   const [fieldErrors, setFieldErrors] = React.useState<{ [key: string]: string }>({});
   const [isGeneratingAll, setIsGeneratingAll] = React.useState(false);
 
+  // Load form data from localStorage on component mount
+  React.useEffect(() => {
+    const savedData = localStorage.getItem('businessEvaluationForm');
+    if (savedData) {
+      try {
+        const parsedData = JSON.parse(savedData);
+        setFormData(parsedData);
+        // Also restore the active step if it exists
+        const savedStep = localStorage.getItem('businessEvaluationStep');
+        if (savedStep) {
+          setActiveStep(parseInt(savedStep));
+        }
+      } catch (error) {
+        console.error('Error loading saved form data:', error);
+      }
+    }
+  }, []);
+
+  // Save form data to localStorage whenever it changes
+  React.useEffect(() => {
+    localStorage.setItem('businessEvaluationForm', JSON.stringify(formData));
+    localStorage.setItem('businessEvaluationStep', activeStep.toString());
+  }, [formData, activeStep]);
+
   const handleNext = () => {
     if (activeStep === steps.length - 1) {
+      // Clear localStorage when form is submitted
+      localStorage.removeItem('businessEvaluationForm');
+      localStorage.removeItem('businessEvaluationStep');
       // Submit form
       router.push('/results');
     } else {
@@ -174,7 +201,7 @@ export default function Evaluate() {
           Authorization: `Bearer ${process.env.NEXT_PUBLIC_OPENAI_API_KEY}`,
         },
         body: JSON.stringify({
-          model: "gpt-3.5-turbo",
+          model: "gpt-4o-mini",
           messages: [
             { role: "system", content: "คุณเป็นที่ปรึกษาธุรกิจที่เชี่ยวชาญในการให้คำแนะนำเกี่ยวกับการเริ่มต้นธุรกิจ" },
             { role: "user", content: prompt },
