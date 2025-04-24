@@ -30,12 +30,24 @@ export default function Home() {
       sx={{
         minHeight: '100vh',
         bgcolor: 'black',
-        background: `linear-gradient(135deg, ${alpha('#000000', 0.95)} 0%, ${alpha('#1a1a1a', 0.95)} 50%, ${alpha('#000000', 0.95)} 100%)`,
+        background: `radial-gradient(circle at 50% 50%, ${alpha('#1a1a1a', 0.95)} 0%, ${alpha('#000000', 0.95)} 100%)`,
+        position: 'relative',
         pt: { xs: 4, md: 6 },
         pb: { xs: 8, md: 12 },
+        '&::before': {
+          content: '""',
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'url("/grid.svg")',
+          opacity: 0.1,
+          zIndex: 0,
+        },
       }}
     >
-      <Container maxWidth="lg">
+      <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 1 }}>
         <Stack spacing={{ xs: 6, md: 8 }}>
           {/* Header */}
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -48,6 +60,17 @@ export default function Home() {
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
                 textShadow: '0 0 30px rgba(159, 122, 234, 0.3)',
+                position: 'relative',
+                '&::after': {
+                  content: '""',
+                  position: 'absolute',
+                  bottom: -8,
+                  left: 0,
+                  width: '60%',
+                  height: 4,
+                  background: `linear-gradient(90deg, ${theme.palette.primary.main}, transparent)`,
+                  borderRadius: 2,
+                }
               }}
             >
               ระบบประเมินไอเดียธุรกิจ
@@ -67,6 +90,11 @@ export default function Home() {
               position: 'relative',
               overflow: 'hidden',
               border: '1px solid rgba(255, 255, 255, 0.1)',
+              transition: 'all 0.3s ease-in-out',
+              '&:hover': {
+                transform: 'translateY(-5px)',
+                boxShadow: `0 20px 40px ${alpha(theme.palette.primary.main, 0.2)}`,
+              },
               '&::before': {
                 content: '""',
                 position: 'absolute',
@@ -77,6 +105,17 @@ export default function Home() {
                 background: `linear-gradient(135deg, ${alpha(theme.palette.primary.main, 0.05)}, ${alpha(theme.palette.secondary.main, 0.05)})`,
                 zIndex: 0,
               },
+              '&::after': {
+                content: '""',
+                position: 'absolute',
+                top: -50,
+                right: -50,
+                width: 200,
+                height: 200,
+                background: `radial-gradient(circle, ${alpha(theme.palette.primary.main, 0.2)} 0%, transparent 70%)`,
+                borderRadius: '50%',
+                filter: 'blur(40px)',
+              }
             }}
           >
             <Box sx={{ position: 'relative', zIndex: 1 }}>
@@ -90,50 +129,85 @@ export default function Home() {
                   background: `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
                   WebkitBackgroundClip: 'text',
                   WebkitTextFillColor: 'transparent',
+                  animation: 'fadeIn 0.8s ease-out',
+                  '@keyframes fadeIn': {
+                    from: {
+                      opacity: 0,
+                      transform: 'translateY(20px)',
+                    },
+                    to: {
+                      opacity: 1,
+                      transform: 'translateY(0)',
+                    },
+                  },
                 }}
               >
                 ยินดีต้อนรับสู่ระบบประเมินไอเดียธุรกิจ
               </Typography>
-              <Typography variant="h6" sx={{ mb: 6, maxWidth: '800px', mx: 'auto', color: 'rgba(255, 255, 255, 0.7)', fontWeight: 'normal' }}>
+              <Typography 
+                variant="h6" 
+                sx={{ 
+                  mb: 6, 
+                  maxWidth: '800px', 
+                  mx: 'auto', 
+                  color: 'rgba(255, 255, 255, 0.7)', 
+                  fontWeight: 'normal',
+                  lineHeight: 1.8,
+                  animation: 'fadeIn 0.8s ease-out 0.2s both',
+                }}
+              >
                 ระบบนี้จะช่วยคุณในการประเมินไอเดียธุรกิจของคุณ โดยวิเคราะห์จากปัจจัยต่างๆ 
                 เพื่อให้คุณสามารถตัดสินใจได้อย่างมีประสิทธิภาพและเพิ่มโอกาสความสำเร็จในการเริ่มต้นธุรกิจ
               </Typography>
-              <Button
-                variant="contained"
-                size="large"
-                onClick={() => router.push('/evaluate')}
-                endIcon={<ArrowForwardIcon />}
-                sx={{
-                  px: 6,
-                  py: 2,
-                  fontSize: '1.1rem',
-                  background: `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.primary.dark})`,
+              <Box sx={{ 
+                animation: 'fadeIn 0.8s ease-out 0.4s both',
+                '& > button': {
+                  transition: 'all 0.3s ease-in-out',
                   '&:hover': {
-                    background: `linear-gradient(135deg, ${theme.palette.primary.dark}, ${theme.palette.primary.main})`,
-                  },
-                  mr: 2,
-                }}
-              >
-                เริ่มประเมินไอเดีย
-              </Button>
-              <Button
-                variant="outlined"
-                size="large"
-                onClick={() => router.push('/advice')}
-                sx={{
-                  px: 6,
-                  py: 2,
-                  fontSize: '1.1rem',
-                  color: 'white',
-                  borderColor: 'rgba(255, 255, 255, 0.5)',
-                  '&:hover': {
-                    borderColor: 'white',
-                    bgcolor: 'rgba(255, 255, 255, 0.1)',
-                  },
-                }}
-              >
-                ดูคำแนะนำธุรกิจ
-              </Button>
+                    transform: 'translateY(-3px)',
+                  }
+                }
+              }}>
+                <Button
+                  variant="contained"
+                  size="large"
+                  onClick={() => router.push('/evaluate')}
+                  endIcon={<ArrowForwardIcon />}
+                  sx={{
+                    px: 6,
+                    py: 2,
+                    fontSize: '1.1rem',
+                    background: `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
+                    '&:hover': {
+                      background: `linear-gradient(135deg, ${theme.palette.secondary.main}, ${theme.palette.primary.main})`,
+                      boxShadow: `0 10px 20px ${alpha(theme.palette.primary.main, 0.3)}`,
+                    },
+                    mr: 2,
+                  }}
+                >
+                  เริ่มประเมินไอเดีย
+                </Button>
+                <Button
+                  variant="outlined"
+                  size="large"
+                  onClick={() => router.push('/advice')}
+                  sx={{
+                    px: 6,
+                    py: 2,
+                    fontSize: '1.1rem',
+                    color: 'white',
+                    borderColor: 'rgba(255, 255, 255, 0.5)',
+                    backdropFilter: 'blur(10px)',
+                    '&:hover': {
+                      borderColor: 'white',
+                      bgcolor: 'rgba(255, 255, 255, 0.1)',
+                      boxShadow: `0 10px 20px rgba(0, 0, 0, 0.2)`,
+                    },
+                  }}
+                >
+                  ดูคำแนะนำธุรกิจ
+                </Button>
+              </Box>
             </Box>
           </Paper>
 
@@ -146,15 +220,21 @@ export default function Home() {
                   background: 'rgba(255, 255, 255, 0.03)',
                   backdropFilter: 'blur(20px)',
                   border: '1px solid rgba(255, 255, 255, 0.1)',
+                  transition: 'all 0.3s ease-in-out',
+                  animation: 'fadeIn 0.8s ease-out 0.6s both',
                   '&:hover': {
                     transform: 'translateY(-8px)',
                     boxShadow: `0 20px 40px ${alpha(theme.palette.primary.main, 0.2)}`,
+                    '& .feature-icon': {
+                      transform: 'scale(1.1)',
+                    }
                   },
                 }}
               >
                 <CardHeader
                   avatar={
                     <Box
+                      className="feature-icon"
                       sx={{
                         width: 56,
                         height: 56,
@@ -164,6 +244,7 @@ export default function Home() {
                         justifyContent: 'center',
                         background: `linear-gradient(135deg, ${alpha(theme.palette.primary.main, 0.2)}, ${alpha(theme.palette.primary.main, 0.3)})`,
                         backdropFilter: 'blur(10px)',
+                        transition: 'transform 0.3s ease-in-out',
                       }}
                     >
                       <AssessmentIcon color="primary" sx={{ fontSize: 32 }} />
@@ -176,7 +257,7 @@ export default function Home() {
                   }
                 />
                 <CardContent>
-                  <Typography variant="body1" sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>
+                  <Typography variant="body1" sx={{ color: 'rgba(255, 255, 255, 0.7)', lineHeight: 1.8 }}>
                     วิเคราะห์ไอเดียธุรกิจของคุณจากหลายมุมมอง ทั้งด้านการตลาด การเงิน และความเป็นไปได้
                   </Typography>
                 </CardContent>

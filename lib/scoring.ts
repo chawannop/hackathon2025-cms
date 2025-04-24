@@ -1,5 +1,9 @@
 // Types for scoring inputs
 export interface BusinessInputs {
+  // Business Information
+  businessName: string;           // ชื่อธุรกิจ
+  businessType: string;          // ประเภทธุรกิจ
+  
   // Market Analysis Inputs
   marketSize: number;              // ขนาดตลาดในพื้นที่ (ล้านบาท/ปี)
   competitorCount: number;         // จำนวนคู่แข่งในรัศมี 1 กิโลเมตร

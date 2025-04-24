@@ -1,108 +1,86 @@
 import OpenAI from 'openai';
-import { BusinessInputs } from './scoring';
-
-// Initialize OpenAI client
-const openai = new OpenAI({
-  apiKey: process.env.NEXT_PUBLIC_OPENAI_API_KEY || '',
-  dangerouslyAllowBrowser: true // Allow client-side usage
-});
+import type { BusinessInputs } from './scoring';
 
 export interface AIAnalysisResult {
+  recommendations: string[];
+  riskFactors: string[];
+  opportunities: string[];
   adjustedScores: {
     marketScore: number;
     financialScore: number;
     operationalScore: number;
   };
-  recommendations: string[];
-  riskFactors: string[];
-  opportunities: string[];
 }
+
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+  dangerouslyAllowBrowser: true
+});
 
 export async function analyzeBusinessWithAI(
   inputs: BusinessInputs,
-  baseScores: { marketScore: number; financialScore: number; operationalScore: number }
+  scores: {
+    marketScore: number;
+    financialScore: number;
+    operationalScore: number;
+  }
 ): Promise<AIAnalysisResult> {
   try {
-    const prompt = `
-    ทำการวิเคราะห์ธุรกิจร้านกาแฟจากข้อมูลต่อไปนี้:
+    const prompt = `ฉันต้องการวิเคราะห์ธุรกิจ ${inputs.businessName} (${inputs.businessType}) โดยมีข้อมูลดังนี้:
 
-    ข้อมูลการตลาด:
-    - ขนาดตลาด: ${inputs.marketSize} ล้านบาท/ปี
-    - จำนวนคู่แข่ง: ${inputs.competitorCount} ราย
-    - กลุ่มลูกค้าเป้าหมาย: ${inputs.targetCustomerCount} คน
-    - คะแนนทำเล: ${inputs.locationScore}/10
+ข้อมูลการเงิน:
+- เงินลงทุนเริ่มต้น: ${inputs.initialInvestment} บาท
+- รายได้ต่อเดือน: ${inputs.monthlyRevenue} บาท
+- ต้นทุนต่อเดือน: ${inputs.monthlyCost} บาท
 
-    ข้อมูลการเงิน:
-    - เงินลงทุน: ${inputs.initialInvestment} บาท
-    - รายได้/เดือน: ${inputs.monthlyRevenue} บาท
-    - ต้นทุน/เดือน: ${inputs.monthlyCost} บาท
-    - ระยะเวลาคืนทุน: ${inputs.breakEvenMonths} เดือน
+ข้อมูลการดำเนินงาน:
+- จำนวนพนักงาน: ${inputs.staffCount} คน
+- ชั่วโมงทำงานต่อวัน: ${inputs.openingHours} ชั่วโมง
+- จำนวนรายการสินค้า/เมนู: ${inputs.menuItems} รายการ
 
-    ข้อมูลการดำเนินงาน:
-    - พนักงาน: ${inputs.staffCount} คน
-    - ชั่วโมงทำการ: ${inputs.openingHours} ชม./วัน
-    - จำนวนเมนู: ${inputs.menuItems} รายการ
-    - คะแนนอุปกรณ์: ${inputs.equipmentQuality}/10
+คะแนนการประเมินเบื้องต้น:
+- ด้านการตลาด: ${scores.marketScore}/100
+- ด้านการเงิน: ${scores.financialScore}/100
+- ด้านการดำเนินงาน: ${scores.operationalScore}/100
 
-    คะแนนพื้นฐาน:
-    - คะแนนการตลาด: ${baseScores.marketScore}
-    - คะแนนการเงิน: ${baseScores.financialScore}
-    - คะแนนการดำเนินงาน: ${baseScores.operationalScore}
+กรุณาวิเคราะห์และให้:
+1. คำแนะนำในการปรับปรุง 3 ข้อ
+2. ปัจจัยเสี่ยงที่ต้องระวัง 3 ข้อ
+3. โอกาสในการเติบโต 3 ข้อ
+4. ปรับคะแนนการประเมินใหม่ตามความเหมาะสม
 
-    กรุณาวิเคราะห์และให้:
-    1. คะแนนที่ปรับแล้วโดยพิจารณาปัจจัยเชิงคุณภาพ
-    2. คำแนะนำสำหรับการปรับปรุงธุรกิจ
-    3. ปัจจัยเสี่ยงที่ต้องระวัง
-    4. โอกาสในการเติบโต
-
-    ตอบในรูปแบบ JSON ตามนี้:
-    {
-      "adjustedScores": {
-        "marketScore": number,
-        "financialScore": number,
-        "operationalScore": number
-      },
-      "recommendations": string[],
-      "riskFactors": string[],
-      "opportunities": string[]
-    }
-    `;
+ตอบในรูปแบบ JSON ตามนี้:
+{
+  "recommendations": ["คำแนะนำ1", "คำแนะนำ2", "คำแนะนำ3"],
+  "riskFactors": ["ความเสี่ยง1", "ความเสี่ยง2", "ความเสี่ยง3"],
+  "opportunities": ["โอกาส1", "โอกาส2", "โอกาส3"],
+  "adjustedScores": {
+    "marketScore": 0,
+    "financialScore": 0,
+    "operationalScore": 0
+  }
+}`;
 
     const completion = await openai.chat.completions.create({
-      model: "gpt-4",
-      messages: [
-        {
-          role: "system",
-          content: "คุณเป็นผู้เชี่ยวชาญด้านการวิเคราะห์ธุรกิจร้านกาแฟ มีประสบการณ์ในการให้คำปรึกษาและประเมินความเป็นไปได้ของธุรกิจ"
-        },
-        {
-          role: "user",
-          content: prompt
-        }
-      ],
+      messages: [{ role: "user", content: prompt }],
+      model: "gpt-3.5-turbo",
       temperature: 0.7,
+      response_format: { type: "json_object" }
     });
 
-    const result = JSON.parse(completion.choices[0].message?.content || "{}");
-    
-    return {
-      adjustedScores: {
-        marketScore: Math.round(result.adjustedScores.marketScore),
-        financialScore: Math.round(result.adjustedScores.financialScore),
-        operationalScore: Math.round(result.adjustedScores.operationalScore)
-      },
-      recommendations: result.recommendations,
-      riskFactors: result.riskFactors,
-      opportunities: result.opportunities
-    };
+    if (!completion.choices[0].message.content) {
+      throw new Error('No response from OpenAI');
+    }
+
+    const result = JSON.parse(completion.choices[0].message.content) as AIAnalysisResult;
+    return result;
   } catch (error) {
     console.error('Error analyzing business with AI:', error);
-    // Return original scores if AI analysis fails
     return {
-      adjustedScores: baseScores,
-      recommendations: ['ไม่สามารถวิเคราะห์เพิ่มเติมได้ในขณะนี้'],
-      riskFactors: ['ไม่สามารถระบุความเสี่ยงได้ในขณะนี้'],
-      opportunities: ['ไม่สามารถระบุโอกาสได้ในขณะนี้']
+      recommendations: ['ไม่สามารถวิเคราะห์ได้ กรุณาลองใหม่อีกครั้ง'],
+      riskFactors: ['ไม่สามารถวิเคราะห์ได้ กรุณาลองใหม่อีกครั้ง'],
+      opportunities: ['ไม่สามารถวิเคราะห์ได้ กรุณาลองใหม่อีกครั้ง'],
+      adjustedScores: scores
     };
   }
 } 
