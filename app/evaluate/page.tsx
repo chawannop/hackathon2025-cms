@@ -29,6 +29,7 @@ import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import { useRouter } from 'next/navigation';
+import { MarkdownViewer } from '@/components/MarkdownViewer';
 
 const steps = ['ข้อมูลธุรกิจ', 'กลุ่มเป้าหมายและปัญหา', 'กลยุทธ์ธุรกิจ', 'การเงินและการดำเนินงาน'];
 

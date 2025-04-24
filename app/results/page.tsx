@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Box,
   Container,
@@ -50,6 +50,7 @@ import { calculateOverallScore, type BusinessInputs } from '@/lib/scoring';
 import { analyzeBusinessWithAI, type AIAnalysisResult } from '@/lib/aiScoring';
 import { motion } from 'framer-motion';
 import { LineChart, BarChart } from '@mui/x-charts';
+import { MarkdownViewer } from '@/components/MarkdownViewer';
 
 // Register ChartJS components
 ChartJS.register(
@@ -82,6 +83,17 @@ interface MockData {
   financialScore: number;
   operationalScore: number;
   overallScore: number;
+}
+
+interface FormData {
+  name: string;
+  description: string;
+  targetUsers: string;
+  solution: string;
+  revenueModel: string;
+  costStructure: string;
+  breakEvenPoint: string;
+  keyMetrics: string;
 }
 
 export default function Results() {
@@ -131,7 +143,7 @@ export default function Results() {
       const calculatedScores = calculateOverallScore(formData);
       setScores(calculatedScores);
       setMockData({
-        businessName: formData.name,
+        businessName: formData.businessName,
         description: formData.description,
         targetUsers: formData.targetUsers,
         solution: formData.solution,
@@ -318,7 +330,7 @@ export default function Results() {
         }
       }}
     >
-      <Container maxWidth="lg">
+      <Container maxWidth="lg" sx={{ px: { xs: 2, sm: 3, md: 4 } }}>
         {isLoading ? (
           <Box
             sx={{
@@ -485,27 +497,32 @@ export default function Results() {
                       </Box>
                     </Grid>
                     <Grid item xs={12} md={6}>
-                      <Box sx={{ height: 200 }}>
+                      <Box sx={{ height: 200, width: '100%', position: 'relative' }}>
                         <motion.div
                           initial={{ scale: 0.8, opacity: 0 }}
                           animate={{ scale: 1, opacity: 1 }}
                           transition={{ duration: 0.5, delay: 0.3 }}
+                          style={{ width: '100%', height: '100%' }}
                         >
-                          <Doughnut data={scoreData} options={{
-                            responsive: true,
-                            maintainAspectRatio: false,
-                            plugins: {
-                              legend: {
-                                position: 'bottom',
-                                labels: {
-                                  color: 'rgba(255,255,255,0.8)',
-                                  font: {
-                                    size: 12
+                          <Doughnut 
+                            data={scoreData} 
+                            options={{
+                              responsive: true,
+                              maintainAspectRatio: false,
+                              plugins: {
+                                legend: {
+                                  position: 'bottom',
+                                  labels: {
+                                    color: 'rgba(255,255,255,0.8)',
+                                    font: {
+                                      size: 12
+                                    },
+                                    padding: 20
                                   }
                                 }
                               }
-                            }
-                          }} />
+                            }} 
+                          />
                         </motion.div>
                       </Box>
                     </Grid>
@@ -604,7 +621,7 @@ export default function Results() {
               </Card>
             </motion.div>
 
-            <Grid container spacing={4}>
+            <Grid container spacing={4} sx={{ mt: { xs: 2, sm: 3, md: 4 } }}>
               <Grid item xs={12}>
                 <motion.div
                   initial="hidden"
@@ -643,11 +660,12 @@ export default function Results() {
                       }
                     />
                     <CardContent>
-                      <Box sx={{ height: 300, p: 2 }}>
+                      <Box sx={{ height: 300, width: '100%', position: 'relative' }}>
                         <motion.div
                           initial={{ x: -20, opacity: 0 }}
                           animate={{ x: 0, opacity: 1 }}
                           transition={{ duration: 0.5, delay: 0.5 }}
+                          style={{ width: '100%', height: '100%' }}
                         >
                           <LineChart
                             xAxis={[{
@@ -676,7 +694,17 @@ export default function Results() {
                               }
                             ]}
                             height={300}
-                            width={600}
+                            sx={{
+                              '.MuiChartsAxis-label': {
+                                fill: 'white',
+                              },
+                              '.MuiChartsAxis-tick': {
+                                fill: 'white',
+                              },
+                              '.MuiChartsLegend-label': {
+                                fill: 'white',
+                              }
+                            }}
                           />
                         </motion.div>
                       </Box>
@@ -725,7 +753,7 @@ export default function Results() {
                       }
                     />
                     <CardContent>
-                      <Box sx={{ height: 250 }}>
+                      <Box sx={{ height: 250, width: '100%', position: 'relative' }}>
                         <BarChart
                           xAxis={[{
                             data: ['ด้านการเงิน', 'ด้านการตลาด', 'ด้านการดำเนินงาน', 'ด้านความเสี่ยง'],
@@ -739,8 +767,18 @@ export default function Results() {
                             data: [mockData.financialScore, mockData.marketScore, mockData.operationalScore, 0],
                             color: theme.palette.primary.main,
                           }]}
-                          height={300}
-                          width={600}
+                          height={250}
+                          sx={{
+                            '.MuiChartsAxis-label': {
+                              fill: 'white',
+                            },
+                            '.MuiChartsAxis-tick': {
+                              fill: 'white',
+                            },
+                            '.MuiChartsLegend-label': {
+                              fill: 'white',
+                            }
+                          }}
                         />
                       </Box>
                     </CardContent>
@@ -788,16 +826,24 @@ export default function Results() {
                       }
                     />
                     <CardContent>
-                      <Grid container spacing={2}>
+                      <Grid container spacing={2} sx={{ height: '400px', overflow: 'auto' }}>
                         <Grid item xs={12}>
-                          <Typography variant="subtitle1" sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>
+                          <Typography variant="subtitle1" sx={{ 
+                            color: 'rgba(255, 255, 255, 0.7)',
+                            position: 'sticky',
+                            top: 0,
+                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                            backdropFilter: 'blur(10px)',
+                            zIndex: 1,
+                            py: 1
+                          }}>
                             รูปแบบรายได้ที่แนะนำ
                           </Typography>
                           <Typography variant="body1" sx={{ color: 'white', mt: 1 }}>
                             {formData?.revenueModel ? (
                               <>
-                                <strong>รูปแบบปัจจุบัน:</strong> {formData.revenueModel}
-                                <br />
+                                <strong>รูปแบบปัจจุบัน:</strong>
+                                <MarkdownViewer content={formData.revenueModel} />
                                 <strong>คำแนะนำ:</strong> พิจารณาเพิ่มช่องทางรายได้เสริม เช่น:
                                 <ul>
                                   <li>บริการเสริมที่เกี่ยวข้อง</li>
@@ -812,14 +858,22 @@ export default function Results() {
                           <Divider sx={{ my: 2, borderColor: 'rgba(255, 255, 255, 0.1)' }} />
                         </Grid>
                         <Grid item xs={12}>
-                          <Typography variant="subtitle1" sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>
+                          <Typography variant="subtitle1" sx={{ 
+                            color: 'rgba(255, 255, 255, 0.7)',
+                            position: 'sticky',
+                            top: 0,
+                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                            backdropFilter: 'blur(10px)',
+                            zIndex: 1,
+                            py: 1
+                          }}>
                             การจัดการต้นทุน
                           </Typography>
                           <Typography variant="body1" sx={{ color: 'white', mt: 1 }}>
                             {formData?.costStructure ? (
                               <>
-                                <strong>โครงสร้างปัจจุบัน:</strong> {formData.costStructure}
-                                <br />
+                                <strong>โครงสร้างปัจจุบัน:</strong>
+                                <MarkdownViewer content={formData.costStructure} />
                                 <strong>คำแนะนำ:</strong>
                                 <ul>
                                   <li>วิเคราะห์ต้นทุนแปรผันและต้นทุนคงที่</li>
@@ -834,14 +888,22 @@ export default function Results() {
                           <Divider sx={{ my: 2, borderColor: 'rgba(255, 255, 255, 0.1)' }} />
                         </Grid>
                         <Grid item xs={12}>
-                          <Typography variant="subtitle1" sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>
+                          <Typography variant="subtitle1" sx={{ 
+                            color: 'rgba(255, 255, 255, 0.7)',
+                            position: 'sticky',
+                            top: 0,
+                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                            backdropFilter: 'blur(10px)',
+                            zIndex: 1,
+                            py: 1
+                          }}>
                             การวางแผนจุดคุ้มทุน
                           </Typography>
                           <Typography variant="body1" sx={{ color: 'white', mt: 1 }}>
                             {formData?.breakEvenPoint ? (
                               <>
-                                <strong>จุดคุ้มทุนปัจจุบัน:</strong> {formData.breakEvenPoint}
-                                <br />
+                                <strong>จุดคุ้มทุนปัจจุบัน:</strong>
+                                <MarkdownViewer content={formData.breakEvenPoint} />
                                 <strong>คำแนะนำ:</strong>
                                 <ul>
                                   <li>ตั้งเป้าหมายยอดขายต่อเดือนให้ชัดเจน</li>
@@ -856,14 +918,22 @@ export default function Results() {
                           <Divider sx={{ my: 2, borderColor: 'rgba(255, 255, 255, 0.1)' }} />
                         </Grid>
                         <Grid item xs={12}>
-                          <Typography variant="subtitle1" sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>
+                          <Typography variant="subtitle1" sx={{ 
+                            color: 'rgba(255, 255, 255, 0.7)',
+                            position: 'sticky',
+                            top: 0,
+                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                            backdropFilter: 'blur(10px)',
+                            zIndex: 1,
+                            py: 1
+                          }}>
                             ตัวชี้วัดความสำเร็จ
                           </Typography>
                           <Typography variant="body1" sx={{ color: 'white', mt: 1 }}>
                             {formData?.keyMetrics ? (
                               <>
-                                <strong>ตัวชี้วัดปัจจุบัน:</strong> {formData.keyMetrics}
-                                <br />
+                                <strong>ตัวชี้วัดปัจจุบัน:</strong>
+                                <MarkdownViewer content={formData.keyMetrics} />
                                 <strong>คำแนะนำ:</strong>
                                 <ul>
                                   <li>ติดตามตัวชี้วัดหลัก (KPIs) อย่างสม่ำเสมอ</li>
@@ -888,7 +958,7 @@ export default function Results() {
               variants={fadeIn}
               transition={{ duration: 0.8, delay: 1 }}
             >
-              <Grid container spacing={4} sx={{ mt: 4 }}>
+              <Grid container spacing={4} sx={{ mt: { xs: 2, sm: 3, md: 4 }, mb: { xs: 4, sm: 6, md: 8 } }}>
                 <Grid item xs={12}>
                   <Card
                     sx={{
