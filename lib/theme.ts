@@ -117,10 +117,9 @@ const themeSettings: ThemeOptions = {
     MuiAppBar: {
       styleOverrides: {
         root: {
-          background: 'rgba(255, 255, 255, 0.02)',
-          backdropFilter: 'blur(20px)',
+          background: 'rgba(255, 255, 255, 0.05)',
+          backdropFilter: 'blur(10px)',
           borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
-          boxShadow: 'none',
         },
       },
     },
@@ -186,20 +185,18 @@ const lightPalette: PaletteOptions = {
 const darkPalette: PaletteOptions = {
   mode: 'dark',
   primary: {
-    main: '#9F7AEA',
-    light: '#B794F4',
-    dark: '#6B46C1',
-    contrastText: '#ffffff',
+    main: '#3f51b5',
+    light: '#757de8',
+    dark: '#002984',
   },
   secondary: {
-    main: '#A0AEC0',
-    light: '#CBD5E0',
-    dark: '#718096',
-    contrastText: '#1A202C',
+    main: '#f50057',
+    light: '#ff4081',
+    dark: '#c51162',
   },
   background: {
-    default: '#1A202C',
-    paper: '#2D3748',
+    default: '#030711',
+    paper: 'rgba(255, 255, 255, 0.05)',
   },
   text: {
     primary: '#F7FAFC',
@@ -220,4 +217,46 @@ const darkThemeBase = createTheme({
 
 // Apply responsive font sizes
 export const lightTheme = responsiveFontSizes(lightThemeBase);
-export const darkTheme = responsiveFontSizes(darkThemeBase); 
+export const darkTheme = responsiveFontSizes(darkThemeBase);
+
+const theme = createTheme({
+  palette: {
+    mode: 'dark',
+    primary: {
+      main: '#3f51b5',
+      light: '#757de8',
+      dark: '#002984',
+    },
+    secondary: {
+      main: '#f50057',
+      light: '#ff4081',
+      dark: '#c51162',
+    },
+    background: {
+      default: '#030711',
+      paper: 'rgba(255, 255, 255, 0.05)',
+    },
+  },
+  components: {
+    MuiAppBar: {
+      styleOverrides: {
+        root: {
+          background: 'rgba(255, 255, 255, 0.05)',
+          backdropFilter: 'blur(10px)',
+          borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+        },
+      },
+    },
+    MuiCard: {
+      styleOverrides: {
+        root: {
+          background: 'rgba(255, 255, 255, 0.05)',
+          backdropFilter: 'blur(10px)',
+          border: '1px solid rgba(255, 255, 255, 0.1)',
+        },
+      },
+    },
+  },
+});
+
+export default theme; 
