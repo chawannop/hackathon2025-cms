@@ -8,7 +8,8 @@ import {
   Container,
   Box,
   Typography,
-  Paper
+  Paper,
+  Modal
 } from '@mui/material';
 
 export default function Evaluate() {
@@ -27,6 +28,8 @@ export default function Evaluate() {
     marketingPlan: '',
   });
 
+  const [openModal, setOpenModal] = useState(false);
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({
@@ -39,6 +42,31 @@ export default function Evaluate() {
     e.preventDefault();
     // TODO: Handle form submission
     router.push('/results');
+  };
+
+  const handleCloseModal = () => setOpenModal(false);
+
+  const isStepComplete = () => {
+    switch (currentStep) {
+      case 1:
+        return formData.businessName && formData.businessDescription && formData.targetCustomers;
+      case 2:
+        return formData.investmentAmount && formData.workingHours;
+      case 3:
+        return formData.sellingPrice && formData.costPerUnit && formData.expectedSales;
+      case 4:
+        return formData.competitors && formData.marketingPlan;
+      default:
+        return false;
+    }
+  };
+
+  const handleNextStep = () => {
+    if (!isStepComplete()) {
+      setOpenModal(true);
+    } else {
+      setCurrentStep(prev => prev + 1);
+    }
   };
 
   return (
@@ -369,11 +397,12 @@ export default function Evaluate() {
                 {currentStep < 4 ? (
                   <Button
                     variant="contained"
-                    onClick={() => setCurrentStep(prev => prev + 1)}
+                    onClick={handleNextStep}
                     sx={{
-                      bgcolor: 'primary.main',
+                      bgcolor: isStepComplete() ? 'primary.main' : 'gray',
+                      color: isStepComplete() ? 'white' : 'rgba(255, 255, 255, 0.5)',
                       '&:hover': {
-                        bgcolor: 'primary.dark',
+                        bgcolor: isStepComplete() ? 'primary.dark' : 'gray',
                       },
                     }}
                   >
@@ -398,6 +427,35 @@ export default function Evaluate() {
           </Paper>
         </Box>
       </Container>
+
+      <Modal
+        open={openModal}
+        onClose={handleCloseModal}
+        aria-labelledby="modal-title"
+        aria-describedby="modal-description"
+      >
+        <Box sx={{ 
+          position: 'absolute', 
+          top: '50%', 
+          left: '50%', 
+          transform: 'translate(-50%, -50%)', 
+          width: 400, 
+          bgcolor: 'background.paper', 
+          border: '2px solid #000', 
+          boxShadow: 24, 
+          p: 4 
+        }}>
+          <Typography id="modal-title" variant="h6" component="h2">
+            ข้อผิดพลาด
+          </Typography>
+          <Typography id="modal-description" sx={{ mt: 2 }}>
+            กรุณากรอกข้อมูลให้ครบถ้วนก่อนดำเนินการต่อ
+          </Typography>
+          <Button onClick={handleCloseModal} sx={{ mt: 2 }}>
+            ปิด
+          </Button>
+        </Box>
+      </Modal>
     </Box>
   );
 } 
