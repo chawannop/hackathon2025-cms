@@ -83,34 +83,36 @@ interface MockData {
   overallScore: number;
 }
 
+
+const sampleInputs: BusinessInputs = {
+  // Business Information
+  businessName: "Tech Startup Co.",
+  description: "A technology company focused on innovative solutions",
+  revenueModel: "Subscription-based SaaS model",
+
+  // Target Users & Problems
+  targetUsers: "Small to medium businesses",
+  painPoint: "Inefficient business processes",
+  solution: "Cloud-based management platform",
+
+  // Business Strategy
+  competitors: "Traditional software providers",
+  usp: "User-friendly interface and AI-powered features",
+  goToMarket: "Direct sales and partnerships",
+
+  // Financial and Operations
+  costStructure: "Cloud infrastructure and development costs",
+  breakEvenPoint: "12 months with 1000 subscribers",
+  keyMetrics: "Monthly recurring revenue, churn rate",
+  resourcesNeeded: "Development team, sales team, marketing budget"
+};
+
+
 export default function Results() {
   const theme = useTheme();
   const router = useRouter();
   const [aiAnalysis, setAiAnalysis] = React.useState<AIAnalysisResult | null>(null);
   const [isLoading, setIsLoading] = React.useState(true);
-
-  const sampleInputs: BusinessInputs = {
-    // Business Information
-    businessName: "Tech Startup Co.",
-    description: "A technology company focused on innovative solutions",
-    revenueModel: "Subscription-based SaaS model",
-
-    // Target Users & Problems
-    targetUsers: "Small to medium businesses",
-    painPoint: "Inefficient business processes",
-    solution: "Cloud-based management platform",
-
-    // Business Strategy
-    competitors: "Traditional software providers",
-    usp: "User-friendly interface and AI-powered features",
-    goToMarket: "Direct sales and partnerships",
-
-    // Financial and Operations
-    costStructure: "Cloud infrastructure and development costs",
-    breakEvenPoint: "12 months with 1000 subscribers",
-    keyMetrics: "Monthly recurring revenue, churn rate",
-    resourcesNeeded: "Development team, sales team, marketing budget"
-  };
 
   const initialScores = calculateOverallScore(sampleInputs);
   const [scores, setScores] = React.useState(initialScores);
@@ -159,7 +161,10 @@ export default function Results() {
     };
 
     fetchAIAnalysis();
-  }, [scores, sampleInputs]);
+
+
+    console.log("=====sampleInputs", sampleInputs);
+  }, [sampleInputs]);
 
   // Monthly projection data
   const monthlyData: MonthlyData = {
@@ -325,10 +330,10 @@ export default function Results() {
               >
                 <ArrowBackIcon />
               </IconButton>
-              <Typography 
-                variant="h3" 
-                component="h1" 
-                sx={{ 
+              <Typography
+                variant="h3"
+                component="h1"
+                sx={{
                   fontWeight: 800,
                   background: `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
                   WebkitBackgroundClip: 'text',
@@ -341,9 +346,9 @@ export default function Results() {
             </Box>
             <ThemeToggle />
           </Box>
-          <Typography 
-            variant="h5" 
-            sx={{ 
+          <Typography
+            variant="h5"
+            sx={{
               color: 'rgba(255, 255, 255, 0.7)',
               mb: 4,
               textAlign: 'center'
@@ -380,7 +385,7 @@ export default function Results() {
             <CardContent>
               <Grid container spacing={3} alignItems="center">
                 <Grid item xs={12} md={6}>
-                  <Typography variant="h6" sx={{ 
+                  <Typography variant="h6" sx={{
                     color: 'rgba(255, 255, 255, 0.9)',
                     mb: 3,
                     display: 'flex',
@@ -422,7 +427,7 @@ export default function Results() {
                 </Grid>
                 <Grid item xs={12} md={6}>
                   <Box sx={{ height: 200 }}>
-                    <motion.div 
+                    <motion.div
                       initial={{ scale: 0.8, opacity: 0 }}
                       animate={{ scale: 1, opacity: 1 }}
                       transition={{ duration: 0.5, delay: 0.3 }}
@@ -448,7 +453,7 @@ export default function Results() {
               </Grid>
 
               <Divider sx={{ my: 3, borderColor: 'rgba(255, 255, 255, 0.1)' }} />
-              
+
               <Grid container spacing={3}>
                 <Grid item xs={12}>
                   <Typography variant="h6" sx={{ color: 'white', mb: 2 }}>
@@ -456,9 +461,9 @@ export default function Results() {
                   </Typography>
                 </Grid>
                 <Grid item xs={12} md={4}>
-                  <Box sx={{ 
-                    p: 3, 
-                    backgroundColor: alpha(theme.palette.primary.main, 0.1), 
+                  <Box sx={{
+                    p: 3,
+                    backgroundColor: alpha(theme.palette.primary.main, 0.1),
                     borderRadius: 2,
                     height: '100%',
                     minHeight: 280,
@@ -471,9 +476,9 @@ export default function Results() {
                         ด้านการตลาด (35%)
                       </Typography>
                       <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.7)', lineHeight: 2 }}>
-                        • ขนาดตลาด (30%)<br/>
-                        • จำนวนคู่แข่ง (25%)<br/>
-                        • ฐานลูกค้าเป้าหมาย (25%)<br/>
+                        • ขนาดตลาด (30%)<br />
+                        • จำนวนคู่แข่ง (25%)<br />
+                        • ฐานลูกค้าเป้าหมาย (25%)<br />
                         • คะแนนทำเลที่ตั้ง (20%)
                       </Typography>
                     </Box>
@@ -483,9 +488,9 @@ export default function Results() {
                   </Box>
                 </Grid>
                 <Grid item xs={12} md={4}>
-                  <Box sx={{ 
-                    p: 3, 
-                    backgroundColor: alpha(theme.palette.secondary.main, 0.1), 
+                  <Box sx={{
+                    p: 3,
+                    backgroundColor: alpha(theme.palette.secondary.main, 0.1),
                     borderRadius: 2,
                     height: '100%',
                     minHeight: 280,
@@ -498,8 +503,8 @@ export default function Results() {
                         ด้านการเงิน (40%)
                       </Typography>
                       <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.7)', lineHeight: 2 }}>
-                        • ผลตอบแทนการลงทุนรายเดือน (30%)<br/>
-                        • ระยะเวลาคืนทุน (30%)<br/>
+                        • ผลตอบแทนการลงทุนรายเดือน (30%)<br />
+                        • ระยะเวลาคืนทุน (30%)<br />
                         • อัตรากำไร (40%)
                       </Typography>
                     </Box>
@@ -509,9 +514,9 @@ export default function Results() {
                   </Box>
                 </Grid>
                 <Grid item xs={12} md={4}>
-                  <Box sx={{ 
-                    p: 3, 
-                    backgroundColor: alpha(theme.palette.success.main, 0.1), 
+                  <Box sx={{
+                    p: 3,
+                    backgroundColor: alpha(theme.palette.success.main, 0.1),
                     borderRadius: 2,
                     height: '100%',
                     minHeight: 280,
@@ -524,9 +529,9 @@ export default function Results() {
                         ด้านการดำเนินงาน (25%)
                       </Typography>
                       <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.7)', lineHeight: 2 }}>
-                        • ประสิทธิภาพพนักงาน (25%)<br/>
-                        • ชั่วโมงการทำงาน (25%)<br/>
-                        • ความหลากหลายของเมนู (25%)<br/>
+                        • ประสิทธิภาพพนักงาน (25%)<br />
+                        • ชั่วโมงการทำงาน (25%)<br />
+                        • ความหลากหลายของเมนู (25%)<br />
                         • คุณภาพอุปกรณ์ (25%)
                       </Typography>
                     </Box>
@@ -580,17 +585,17 @@ export default function Results() {
                 />
                 <CardContent>
                   <Box sx={{ height: 300, p: 2 }}>
-                    <motion.div 
+                    <motion.div
                       initial={{ x: -20, opacity: 0 }}
                       animate={{ x: 0, opacity: 1 }}
                       transition={{ duration: 0.5, delay: 0.5 }}
                     >
                       <LineChart
-                        xAxis={[{ 
+                        xAxis={[{
                           data: monthlyData.labels,
                           scaleType: 'band',
                         }]}
-                        yAxis={[{ 
+                        yAxis={[{
                           min: 0,
                           max: Math.max(...monthlyData.datasets[0].data) * 1.2,
                         }]}
@@ -663,11 +668,11 @@ export default function Results() {
                 <CardContent>
                   <Box sx={{ height: 250 }}>
                     <BarChart
-                      xAxis={[{ 
+                      xAxis={[{
                         data: ['ด้านการเงิน', 'ด้านการตลาด', 'ด้านการดำเนินงาน', 'ด้านความเสี่ยง'],
                         scaleType: 'band',
                       }]}
-                      yAxis={[{ 
+                      yAxis={[{
                         min: 0,
                         max: 100,
                       }]}
@@ -888,9 +893,9 @@ export default function Results() {
                       ด้านการตลาด (35%)
                     </Typography>
                     <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>
-                      • ขนาดตลาด (30%)<br/>
-                      • จำนวนคู่แข่ง (25%)<br/>
-                      • ฐานลูกค้าเป้าหมาย (25%)<br/>
+                      • ขนาดตลาด (30%)<br />
+                      • จำนวนคู่แข่ง (25%)<br />
+                      • ฐานลูกค้าเป้าหมาย (25%)<br />
                       • คะแนนทำเลที่ตั้ง (20%)
                     </Typography>
                   </Grid>
@@ -899,8 +904,8 @@ export default function Results() {
                       ด้านการเงิน (40%)
                     </Typography>
                     <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>
-                      • ผลตอบแทนการลงทุนรายเดือน (30%)<br/>
-                      • ระยะเวลาคืนทุน (30%)<br/>
+                      • ผลตอบแทนการลงทุนรายเดือน (30%)<br />
+                      • ระยะเวลาคืนทุน (30%)<br />
                       • อัตรากำไร (40%)
                     </Typography>
                   </Grid>
@@ -909,9 +914,9 @@ export default function Results() {
                       ด้านการดำเนินงาน (25%)
                     </Typography>
                     <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>
-                      • ประสิทธิภาพพนักงาน (25%)<br/>
-                      • ชั่วโมงการทำงาน (25%)<br/>
-                      • ความหลากหลายของเมนู (25%)<br/>
+                      • ประสิทธิภาพพนักงาน (25%)<br />
+                      • ชั่วโมงการทำงาน (25%)<br />
+                      • ความหลากหลายของเมนู (25%)<br />
                       • คุณภาพอุปกรณ์ (25%)
                     </Typography>
                   </Grid>
