@@ -90,7 +90,7 @@ export default function Evaluate() {
   const handleNext = () => {
     if (activeStep === steps.length - 1) {
       // Clear localStorage when form is submitted
-      localStorage.removeItem('businessEvaluationForm');
+      // localStorage.removeItem('businessEvaluationForm');
       localStorage.removeItem('businessEvaluationStep');
       // Submit form
       router.push('/results');
