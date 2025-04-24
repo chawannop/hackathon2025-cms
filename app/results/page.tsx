@@ -20,6 +20,7 @@ import {
   ListItem,
   ListItemText,
   CircularProgress,
+  IconButton,
 } from '@mui/material';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
@@ -27,6 +28,8 @@ import MonetizationOnIcon from '@mui/icons-material/MonetizationOn';
 import TimelineIcon from '@mui/icons-material/Timeline';
 import AssessmentIcon from '@mui/icons-material/Assessment';
 import AnalyticsIcon from '@mui/icons-material/Analytics';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import { useRouter } from 'next/navigation';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -69,46 +72,53 @@ interface MonthlyData {
   }[];
 }
 
+interface MockData {
+  businessName: string;
+  description: string;
+  targetUsers: string;
+  solution: string;
+  marketScore: number;
+  financialScore: number;
+  operationalScore: number;
+  overallScore: number;
+}
+
 export default function Results() {
   const theme = useTheme();
+  const router = useRouter();
   const [aiAnalysis, setAiAnalysis] = React.useState<AIAnalysisResult | null>(null);
   const [isLoading, setIsLoading] = React.useState(true);
 
   const sampleInputs: BusinessInputs = {
     // Business Information
-    businessName: "Café Artisan",
-    businessType: "ร้านกาแฟพรีเมียม",
-    
-    // Market Analysis Inputs
-    marketSize: 5,
-    competitorCount: 3,
-    targetCustomerCount: 500,
-    locationScore: 8,
-    
-    // Financial Inputs
-    initialInvestment: 500000,
-    monthlyRevenue: 150000,
-    monthlyCost: 90000,
-    breakEvenMonths: 8.33,
-    
-    // Operational Inputs
-    staffCount: 4,
-    openingHours: 12,
-    menuItems: 15,
-    equipmentQuality: 8,
+    businessName: "Tech Startup Co.",
+    description: "A technology company focused on innovative solutions",
+    revenueModel: "Subscription-based SaaS model",
+
+    // Target Users & Problems
+    targetUsers: "Small to medium businesses",
+    painPoint: "Inefficient business processes",
+    solution: "Cloud-based management platform",
+
+    // Business Strategy
+    competitors: "Traditional software providers",
+    usp: "User-friendly interface and AI-powered features",
+    goToMarket: "Direct sales and partnerships",
+
+    // Financial and Operations
+    costStructure: "Cloud infrastructure and development costs",
+    breakEvenPoint: "12 months with 1000 subscribers",
+    keyMetrics: "Monthly recurring revenue, churn rate",
+    resourcesNeeded: "Development team, sales team, marketing budget"
   };
 
   const initialScores = calculateOverallScore(sampleInputs);
   const [scores, setScores] = React.useState(initialScores);
-  
-  const [mockData, setMockData] = React.useState({
+  const [mockData, setMockData] = React.useState<MockData>({
     businessName: sampleInputs.businessName,
-    investmentAmount: sampleInputs.initialInvestment,
-    monthlyRevenue: sampleInputs.monthlyRevenue,
-    monthlyCost: sampleInputs.monthlyCost,
-    monthlyProfit: sampleInputs.monthlyRevenue - sampleInputs.monthlyCost,
-    breakEvenMonths: sampleInputs.breakEvenMonths,
-    roi: ((sampleInputs.monthlyRevenue - sampleInputs.monthlyCost) / sampleInputs.initialInvestment) * 100,
+    description: sampleInputs.description,
+    targetUsers: sampleInputs.targetUsers,
+    solution: sampleInputs.solution,
     marketScore: initialScores.marketScore,
     financialScore: initialScores.financialScore,
     operationalScore: initialScores.operationalScore,
@@ -149,19 +159,23 @@ export default function Results() {
     };
 
     fetchAIAnalysis();
-  }, [scores]);
+  }, [scores, sampleInputs]);
 
   // Monthly projection data
   const monthlyData: MonthlyData = {
     labels: ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.'],
     datasets: [
       {
-        label: 'รายได้',
-        data: [30000, 35000, 40000, 45000, 50000, 55000],
+        label: 'คะแนนการตลาด',
+        data: [60, 65, 70, 75, 80, 85],
       },
       {
-        label: 'รายจ่าย',
-        data: [25000, 28000, 32000, 35000, 38000, 42000],
+        label: 'คะแนนการเงิน',
+        data: [55, 60, 65, 70, 75, 80],
+      },
+      {
+        label: 'คะแนนการดำเนินงาน',
+        data: [50, 55, 60, 65, 70, 75],
       },
     ],
   };
@@ -189,11 +203,11 @@ export default function Results() {
 
   // ROI Projection data
   const roiData: ChartData<'bar'> = {
-    labels: ['ปีที่ 1', 'ปีที่ 2', 'ปีที่ 3'],
+    labels: ['การตลาด', 'การเงิน', 'การดำเนินงาน'],
     datasets: [
       {
-        label: 'ผลตอบแทนการลงทุน (%)',
-        data: [mockData.roi, mockData.roi * 1.5, mockData.roi * 2],
+        label: 'คะแนน',
+        data: [mockData.marketScore, mockData.financialScore, mockData.operationalScore],
         backgroundColor: alpha(theme.palette.primary.main, 0.8),
       },
     ],
@@ -208,7 +222,7 @@ export default function Results() {
       },
       title: {
         display: true,
-        text: 'Financial Projections',
+        text: 'แนวโน้มคะแนน',
         color: theme.palette.common.white,
       },
     },
@@ -241,7 +255,7 @@ export default function Results() {
       },
       title: {
         display: true,
-        text: 'ROI Projections',
+        text: 'คะแนนในแต่ละด้าน',
         color: theme.palette.common.white,
       },
     },
@@ -299,23 +313,32 @@ export default function Results() {
           transition={{ duration: 0.6 }}
         >
           <Box sx={{ mb: 6, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <Typography 
-              variant="h3" 
-              component="h1" 
-              sx={{ 
-                fontWeight: 800,
-                background: `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                textShadow: '0 0 30px rgba(159, 122, 234, 0.3)',
-                display: 'flex',
-                alignItems: 'center',
-                gap: 2
-              }}
-            >
-              <AnalyticsIcon sx={{ fontSize: 40 }} />
-              ผลการวิเคราะห์ธุรกิจ
-            </Typography>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              <IconButton
+                onClick={() => router.push('/')}
+                sx={{
+                  color: 'white',
+                  '&:hover': {
+                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                  },
+                }}
+              >
+                <ArrowBackIcon />
+              </IconButton>
+              <Typography 
+                variant="h3" 
+                component="h1" 
+                sx={{ 
+                  fontWeight: 800,
+                  background: `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  textShadow: '0 0 30px rgba(159, 122, 234, 0.3)',
+                }}
+              >
+                ผลการประเมิน
+              </Typography>
+            </Box>
             <ThemeToggle />
           </Box>
           <Typography 
@@ -581,6 +604,11 @@ export default function Results() {
                             data: monthlyData.datasets[1].data,
                             label: monthlyData.datasets[1].label,
                             color: theme.palette.secondary.main,
+                          },
+                          {
+                            data: monthlyData.datasets[2].data,
+                            label: monthlyData.datasets[2].label,
+                            color: theme.palette.success.main,
                           }
                         ]}
                         height={300}
@@ -691,7 +719,7 @@ export default function Results() {
                   }
                   title={
                     <Typography variant="h6" sx={{ color: 'white' }}>
-                      ตัวชี้วัดสำคัญ
+                      ข้อมูลการเงินและการดำเนินงาน
                     </Typography>
                   }
                 />
@@ -699,21 +727,10 @@ export default function Results() {
                   <Grid container spacing={2}>
                     <Grid item xs={12}>
                       <Typography variant="subtitle1" sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>
-                        เงินลงทุนเริ่มต้น
+                        รูปแบบรายได้
                       </Typography>
-                      <Typography variant="h5" sx={{ color: 'white' }}>
-                        {mockData.investmentAmount.toLocaleString()} บาท
-                      </Typography>
-                    </Grid>
-                    <Grid item xs={12}>
-                      <Divider sx={{ my: 1, borderColor: 'rgba(255, 255, 255, 0.1)' }} />
-                    </Grid>
-                    <Grid item xs={12}>
-                      <Typography variant="subtitle1" sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>
-                        รายได้ต่อเดือน (เฉลี่ย)
-                      </Typography>
-                      <Typography variant="h5" sx={{ color: 'white' }}>
-                        {mockData.monthlyRevenue.toLocaleString()} บาท
+                      <Typography variant="h6" sx={{ color: 'white' }}>
+                        {sampleInputs.revenueModel}
                       </Typography>
                     </Grid>
                     <Grid item xs={12}>
@@ -721,10 +738,10 @@ export default function Results() {
                     </Grid>
                     <Grid item xs={12}>
                       <Typography variant="subtitle1" sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>
-                        กำไรต่อเดือน (เฉลี่ย)
+                        โครงสร้างต้นทุน
                       </Typography>
-                      <Typography variant="h5" sx={{ color: 'white' }}>
-                        {mockData.monthlyProfit.toLocaleString()} บาท
+                      <Typography variant="h6" sx={{ color: 'white' }}>
+                        {sampleInputs.costStructure}
                       </Typography>
                     </Grid>
                     <Grid item xs={12}>
@@ -732,10 +749,21 @@ export default function Results() {
                     </Grid>
                     <Grid item xs={12}>
                       <Typography variant="subtitle1" sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>
-                        ระยะเวลาคืนทุน
+                        จุดคุ้มทุน
                       </Typography>
-                      <Typography variant="h5" sx={{ color: 'white' }}>
-                        {Math.ceil(mockData.breakEvenMonths)} เดือน
+                      <Typography variant="h6" sx={{ color: 'white' }}>
+                        {sampleInputs.breakEvenPoint}
+                      </Typography>
+                    </Grid>
+                    <Grid item xs={12}>
+                      <Divider sx={{ my: 1, borderColor: 'rgba(255, 255, 255, 0.1)' }} />
+                    </Grid>
+                    <Grid item xs={12}>
+                      <Typography variant="subtitle1" sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>
+                        ตัวชี้วัดสำคัญ
+                      </Typography>
+                      <Typography variant="h6" sx={{ color: 'white' }}>
+                        {sampleInputs.keyMetrics}
                       </Typography>
                     </Grid>
                   </Grid>

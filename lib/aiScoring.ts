@@ -26,17 +26,27 @@ export async function analyzeBusinessWithAI(
   }
 ): Promise<AIAnalysisResult> {
   try {
-    const prompt = `ฉันต้องการวิเคราะห์ธุรกิจ ${inputs.businessName} (${inputs.businessType}) โดยมีข้อมูลดังนี้:
+    const prompt = `ฉันต้องการวิเคราะห์ธุรกิจ ${inputs.businessName} โดยมีข้อมูลดังนี้:
 
-ข้อมูลการเงิน:
-- เงินลงทุนเริ่มต้น: ${inputs.initialInvestment} บาท
-- รายได้ต่อเดือน: ${inputs.monthlyRevenue} บาท
-- ต้นทุนต่อเดือน: ${inputs.monthlyCost} บาท
+ข้อมูลธุรกิจ:
+- คำอธิบายธุรกิจ: ${inputs.description}
+- รูปแบบรายได้: ${inputs.revenueModel}
 
-ข้อมูลการดำเนินงาน:
-- จำนวนพนักงาน: ${inputs.staffCount} คน
-- ชั่วโมงทำงานต่อวัน: ${inputs.openingHours} ชั่วโมง
-- จำนวนรายการสินค้า/เมนู: ${inputs.menuItems} รายการ
+กลุ่มเป้าหมายและปัญหา:
+- กลุ่มเป้าหมาย: ${inputs.targetUsers}
+- ปัญหาที่พบ: ${inputs.painPoint}
+- วิธีแก้ปัญหา: ${inputs.solution}
+
+กลยุทธ์ธุรกิจ:
+- คู่แข่ง: ${inputs.competitors}
+- จุดเด่นของธุรกิจ: ${inputs.usp}
+- แผนการเข้าสู่ตลาด: ${inputs.goToMarket}
+
+การเงินและการดำเนินงาน:
+- โครงสร้างต้นทุน: ${inputs.costStructure}
+- จุดคุ้มทุน: ${inputs.breakEvenPoint}
+- ตัวชี้วัดสำคัญ: ${inputs.keyMetrics}
+- ทรัพยากรที่ต้องการ: ${inputs.resourcesNeeded}
 
 คะแนนการประเมินเบื้องต้น:
 - ด้านการตลาด: ${scores.marketScore}/100
