@@ -2,6 +2,14 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { 
+  TextField,
+  Button,
+  Container,
+  Box,
+  Typography,
+  Paper
+} from '@mui/material';
 
 export default function Evaluate() {
   const router = useRouter();
@@ -34,180 +42,362 @@ export default function Evaluate() {
   };
 
   return (
-    <main className="min-h-screen bg-gray-50 py-12">
-      <div className="container mx-auto px-4">
-        <div className="max-w-2xl mx-auto">
-          <h1 className="text-3xl font-bold text-gray-800 mb-8 text-center">
+    <Box
+      sx={{
+        minHeight: '100vh',
+        bgcolor: 'black',
+        py: 6,
+      }}
+    >
+      <Container maxWidth="md">
+        <Box sx={{ maxWidth: 800, mx: 'auto' }}>
+          <Typography variant="h4" sx={{ color: 'white', mb: 4, textAlign: 'center', fontWeight: 'bold' }}>
             ประเมินไอเดียธุรกิจของคุณ
-          </h1>
+          </Typography>
 
-          <div className="bg-white rounded-xl shadow-md p-8">
+          <Paper 
+            elevation={3}
+            sx={{
+              p: 4,
+              bgcolor: 'rgba(255, 255, 255, 0.05)',
+              backdropFilter: 'blur(10px)',
+              borderRadius: 4,
+            }}
+          >
             <form onSubmit={handleSubmit}>
               {currentStep === 1 && (
-                <div className="space-y-6">
-                  <h2 className="text-xl font-semibold text-gray-800 mb-4">ข้อมูลพื้นฐาน</h2>
-                  <div>
-                    <label className="block text-gray-700 mb-2">ชื่อธุรกิจ</label>
-                    <input
-                      type="text"
-                      name="businessName"
-                      value={formData.businessName}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-gray-700 mb-2">อธิบายธุรกิจของคุณ</label>
-                    <textarea
-                      name="businessDescription"
-                      value={formData.businessDescription}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      rows={4}
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-gray-700 mb-2">กลุ่มลูกค้าเป้าหมาย</label>
-                    <input
-                      type="text"
-                      name="targetCustomers"
-                      value={formData.targetCustomers}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      required
-                    />
-                  </div>
-                </div>
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+                  <Typography variant="h6" sx={{ color: 'white', mb: 2 }}>ข้อมูลพื้นฐาน</Typography>
+                  <TextField
+                    fullWidth
+                    label="ชื่อธุรกิจ"
+                    name="businessName"
+                    value={formData.businessName}
+                    onChange={handleInputChange}
+                    required
+                    variant="outlined"
+                    sx={{
+                      '& .MuiOutlinedInput-root': {
+                        '& fieldset': {
+                          borderColor: 'rgba(255, 255, 255, 0.23)',
+                        },
+                        '&:hover fieldset': {
+                          borderColor: 'rgba(255, 255, 255, 0.5)',
+                        },
+                      },
+                      '& .MuiInputLabel-root': {
+                        color: 'rgba(255, 255, 255, 0.7)',
+                      },
+                      '& .MuiInputBase-input': {
+                        color: 'white',
+                      },
+                    }}
+                  />
+                  <TextField
+                    fullWidth
+                    label="อธิบายธุรกิจของคุณ"
+                    name="businessDescription"
+                    value={formData.businessDescription}
+                    onChange={handleInputChange}
+                    required
+                    multiline
+                    rows={4}
+                    variant="outlined"
+                    sx={{
+                      '& .MuiOutlinedInput-root': {
+                        '& fieldset': {
+                          borderColor: 'rgba(255, 255, 255, 0.23)',
+                        },
+                        '&:hover fieldset': {
+                          borderColor: 'rgba(255, 255, 255, 0.5)',
+                        },
+                      },
+                      '& .MuiInputLabel-root': {
+                        color: 'rgba(255, 255, 255, 0.7)',
+                      },
+                      '& .MuiInputBase-input': {
+                        color: 'white',
+                      },
+                    }}
+                  />
+                  <TextField
+                    fullWidth
+                    label="กลุ่มลูกค้าเป้าหมาย"
+                    name="targetCustomers"
+                    value={formData.targetCustomers}
+                    onChange={handleInputChange}
+                    required
+                    variant="outlined"
+                    sx={{
+                      '& .MuiOutlinedInput-root': {
+                        '& fieldset': {
+                          borderColor: 'rgba(255, 255, 255, 0.23)',
+                        },
+                        '&:hover fieldset': {
+                          borderColor: 'rgba(255, 255, 255, 0.5)',
+                        },
+                      },
+                      '& .MuiInputLabel-root': {
+                        color: 'rgba(255, 255, 255, 0.7)',
+                      },
+                      '& .MuiInputBase-input': {
+                        color: 'white',
+                      },
+                    }}
+                  />
+                </Box>
               )}
 
               {currentStep === 2 && (
-                <div className="space-y-6">
-                  <h2 className="text-xl font-semibold text-gray-800 mb-4">ข้อมูลการลงทุน</h2>
-                  <div>
-                    <label className="block text-gray-700 mb-2">เงินลงทุนเริ่มต้น (บาท)</label>
-                    <input
-                      type="number"
-                      name="investmentAmount"
-                      value={formData.investmentAmount}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-gray-700 mb-2">เวลาที่สามารถทำงานได้ต่อวัน (ชั่วโมง)</label>
-                    <input
-                      type="number"
-                      name="workingHours"
-                      value={formData.workingHours}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      required
-                    />
-                  </div>
-                </div>
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+                  <Typography variant="h6" sx={{ color: 'white', mb: 2 }}>ข้อมูลการลงทุน</Typography>
+                  <TextField
+                    fullWidth
+                    label="เงินลงทุนเริ่มต้น (บาท)"
+                    name="investmentAmount"
+                    type="number"
+                    value={formData.investmentAmount}
+                    onChange={handleInputChange}
+                    required
+                    variant="outlined"
+                    sx={{
+                      '& .MuiOutlinedInput-root': {
+                        '& fieldset': {
+                          borderColor: 'rgba(255, 255, 255, 0.23)',
+                        },
+                        '&:hover fieldset': {
+                          borderColor: 'rgba(255, 255, 255, 0.5)',
+                        },
+                      },
+                      '& .MuiInputLabel-root': {
+                        color: 'rgba(255, 255, 255, 0.7)',
+                      },
+                      '& .MuiInputBase-input': {
+                        color: 'white',
+                      },
+                    }}
+                  />
+                  <TextField
+                    fullWidth
+                    label="เวลาที่สามารถทำงานได้ต่อวัน (ชั่วโมง)"
+                    name="workingHours"
+                    type="number"
+                    value={formData.workingHours}
+                    onChange={handleInputChange}
+                    required
+                    variant="outlined"
+                    sx={{
+                      '& .MuiOutlinedInput-root': {
+                        '& fieldset': {
+                          borderColor: 'rgba(255, 255, 255, 0.23)',
+                        },
+                        '&:hover fieldset': {
+                          borderColor: 'rgba(255, 255, 255, 0.5)',
+                        },
+                      },
+                      '& .MuiInputLabel-root': {
+                        color: 'rgba(255, 255, 255, 0.7)',
+                      },
+                      '& .MuiInputBase-input': {
+                        color: 'white',
+                      },
+                    }}
+                  />
+                </Box>
               )}
 
               {currentStep === 3 && (
-                <div className="space-y-6">
-                  <h2 className="text-xl font-semibold text-gray-800 mb-4">ข้อมูลการขาย</h2>
-                  <div>
-                    <label className="block text-gray-700 mb-2">ราคาขายต่อหน่วย (บาท)</label>
-                    <input
-                      type="number"
-                      name="sellingPrice"
-                      value={formData.sellingPrice}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-gray-700 mb-2">ต้นทุนต่อหน่วย (บาท)</label>
-                    <input
-                      type="number"
-                      name="costPerUnit"
-                      value={formData.costPerUnit}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-gray-700 mb-2">คาดว่าจะขายได้ต่อวัน (หน่วย)</label>
-                    <input
-                      type="number"
-                      name="expectedSales"
-                      value={formData.expectedSales}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      required
-                    />
-                  </div>
-                </div>
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+                  <Typography variant="h6" sx={{ color: 'white', mb: 2 }}>ข้อมูลการขาย</Typography>
+                  <TextField
+                    fullWidth
+                    label="ราคาขายต่อหน่วย (บาท)"
+                    name="sellingPrice"
+                    type="number"
+                    value={formData.sellingPrice}
+                    onChange={handleInputChange}
+                    required
+                    variant="outlined"
+                    sx={{
+                      '& .MuiOutlinedInput-root': {
+                        '& fieldset': {
+                          borderColor: 'rgba(255, 255, 255, 0.23)',
+                        },
+                        '&:hover fieldset': {
+                          borderColor: 'rgba(255, 255, 255, 0.5)',
+                        },
+                      },
+                      '& .MuiInputLabel-root': {
+                        color: 'rgba(255, 255, 255, 0.7)',
+                      },
+                      '& .MuiInputBase-input': {
+                        color: 'white',
+                      },
+                    }}
+                  />
+                  <TextField
+                    fullWidth
+                    label="ต้นทุนต่อหน่วย (บาท)"
+                    name="costPerUnit"
+                    type="number"
+                    value={formData.costPerUnit}
+                    onChange={handleInputChange}
+                    required
+                    variant="outlined"
+                    sx={{
+                      '& .MuiOutlinedInput-root': {
+                        '& fieldset': {
+                          borderColor: 'rgba(255, 255, 255, 0.23)',
+                        },
+                        '&:hover fieldset': {
+                          borderColor: 'rgba(255, 255, 255, 0.5)',
+                        },
+                      },
+                      '& .MuiInputLabel-root': {
+                        color: 'rgba(255, 255, 255, 0.7)',
+                      },
+                      '& .MuiInputBase-input': {
+                        color: 'white',
+                      },
+                    }}
+                  />
+                  <TextField
+                    fullWidth
+                    label="คาดว่าจะขายได้ต่อวัน (หน่วย)"
+                    name="expectedSales"
+                    type="number"
+                    value={formData.expectedSales}
+                    onChange={handleInputChange}
+                    required
+                    variant="outlined"
+                    sx={{
+                      '& .MuiOutlinedInput-root': {
+                        '& fieldset': {
+                          borderColor: 'rgba(255, 255, 255, 0.23)',
+                        },
+                        '&:hover fieldset': {
+                          borderColor: 'rgba(255, 255, 255, 0.5)',
+                        },
+                      },
+                      '& .MuiInputLabel-root': {
+                        color: 'rgba(255, 255, 255, 0.7)',
+                      },
+                      '& .MuiInputBase-input': {
+                        color: 'white',
+                      },
+                    }}
+                  />
+                </Box>
               )}
 
               {currentStep === 4 && (
-                <div className="space-y-6">
-                  <h2 className="text-xl font-semibold text-gray-800 mb-4">ข้อมูลการตลาด</h2>
-                  <div>
-                    <label className="block text-gray-700 mb-2">มีคู่แข่งในพื้นที่กี่ราย</label>
-                    <input
-                      type="number"
-                      name="competitors"
-                      value={formData.competitors}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-gray-700 mb-2">แผนการตลาด</label>
-                    <textarea
-                      name="marketingPlan"
-                      value={formData.marketingPlan}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      rows={4}
-                      required
-                    />
-                  </div>
-                </div>
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+                  <Typography variant="h6" sx={{ color: 'white', mb: 2 }}>ข้อมูลการตลาด</Typography>
+                  <TextField
+                    fullWidth
+                    label="มีคู่แข่งในพื้นที่กี่ราย"
+                    name="competitors"
+                    type="number"
+                    value={formData.competitors}
+                    onChange={handleInputChange}
+                    required
+                    variant="outlined"
+                    sx={{
+                      '& .MuiOutlinedInput-root': {
+                        '& fieldset': {
+                          borderColor: 'rgba(255, 255, 255, 0.23)',
+                        },
+                        '&:hover fieldset': {
+                          borderColor: 'rgba(255, 255, 255, 0.5)',
+                        },
+                      },
+                      '& .MuiInputLabel-root': {
+                        color: 'rgba(255, 255, 255, 0.7)',
+                      },
+                      '& .MuiInputBase-input': {
+                        color: 'white',
+                      },
+                    }}
+                  />
+                  <TextField
+                    fullWidth
+                    label="แผนการตลาด"
+                    name="marketingPlan"
+                    value={formData.marketingPlan}
+                    onChange={handleInputChange}
+                    required
+                    multiline
+                    rows={4}
+                    variant="outlined"
+                    sx={{
+                      '& .MuiOutlinedInput-root': {
+                        '& fieldset': {
+                          borderColor: 'rgba(255, 255, 255, 0.23)',
+                        },
+                        '&:hover fieldset': {
+                          borderColor: 'rgba(255, 255, 255, 0.5)',
+                        },
+                      },
+                      '& .MuiInputLabel-root': {
+                        color: 'rgba(255, 255, 255, 0.7)',
+                      },
+                      '& .MuiInputBase-input': {
+                        color: 'white',
+                      },
+                    }}
+                  />
+                </Box>
               )}
 
-              <div className="mt-8 flex justify-between">
+              <Box sx={{ mt: 4, display: 'flex', gap: 2, justifyContent: 'flex-end' }}>
                 {currentStep > 1 && (
-                  <button
-                    type="button"
+                  <Button
+                    variant="outlined"
                     onClick={() => setCurrentStep(prev => prev - 1)}
-                    className="px-6 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition duration-300"
+                    sx={{
+                      color: 'white',
+                      borderColor: 'rgba(255, 255, 255, 0.5)',
+                      '&:hover': {
+                        borderColor: 'white',
+                        bgcolor: 'rgba(255, 255, 255, 0.1)',
+                      },
+                    }}
                   >
                     ย้อนกลับ
-                  </button>
+                  </Button>
                 )}
                 {currentStep < 4 ? (
-                  <button
-                    type="button"
+                  <Button
+                    variant="contained"
                     onClick={() => setCurrentStep(prev => prev + 1)}
-                    className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition duration-300"
+                    sx={{
+                      bgcolor: 'primary.main',
+                      '&:hover': {
+                        bgcolor: 'primary.dark',
+                      },
+                    }}
                   >
                     ถัดไป
-                  </button>
+                  </Button>
                 ) : (
-                  <button
+                  <Button
                     type="submit"
-                    className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition duration-300"
+                    variant="contained"
+                    sx={{
+                      bgcolor: 'success.main',
+                      '&:hover': {
+                        bgcolor: 'success.dark',
+                      },
+                    }}
                   >
                     ส่งแบบประเมิน
-                  </button>
+                  </Button>
                 )}
-              </div>
+              </Box>
             </form>
-          </div>
-        </div>
-      </div>
-    </main>
+          </Paper>
+        </Box>
+      </Container>
+    </Box>
   );
 } 
