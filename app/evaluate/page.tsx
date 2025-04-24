@@ -18,6 +18,7 @@ import {
   Tooltip,
   alpha,
   useTheme,
+  Modal,
 } from '@mui/material';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import StorefrontIcon from '@mui/icons-material/Storefront';
@@ -47,6 +48,7 @@ export default function Evaluate() {
     openingHours: '',
     menuItems: '',
   });
+  const [modalOpen, setModalOpen] = React.useState(false);
 
   // Animation variants for framer-motion
   const fadeIn = {
@@ -255,6 +257,31 @@ export default function Evaluate() {
     }
   };
 
+  const isStepComplete = (step: number) => {
+    switch (step) {
+      case 0:
+        return formData.businessName !== '' && formData.businessType !== '';
+      case 1:
+        return formData.initialInvestment !== '' && formData.monthlyRevenue !== '' && formData.monthlyCost !== '';
+      case 2:
+        return formData.staffCount !== '' && formData.openingHours !== '' && formData.menuItems !== '';
+      default:
+        return false;
+    }
+  };
+
+  const handleNextClick = () => {
+    if (isStepComplete(activeStep)) {
+      handleNext();
+    } else {
+      setModalOpen(true);
+    }
+  };
+
+  const handleCloseModal = () => {
+    setModalOpen(false);
+  };
+
   return (
     <Box
       sx={{
@@ -388,12 +415,12 @@ export default function Evaluate() {
               )}
               <Button
                 variant="contained"
-                onClick={handleNext}
+                onClick={handleNextClick}
                 sx={{
                   px: 4,
                   py: 1.5,
                   background: `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
-                  color: 'white',
+                  color: isStepComplete(activeStep) ? 'white' : 'rgba(255, 255, 255, 0.5)',
                   '&:hover': {
                     background: `linear-gradient(135deg, ${theme.palette.secondary.main}, ${theme.palette.primary.main})`,
                     transform: 'translateY(-2px)',
@@ -407,6 +434,37 @@ export default function Evaluate() {
             </Box>
           </CardContent>
         </Card>
+
+        <Modal
+          open={modalOpen}
+          onClose={handleCloseModal}
+          aria-labelledby="incomplete-data-modal"
+          aria-describedby="incomplete-data-description"
+        >
+          <Box
+            sx={{
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              width: 400,
+              bgcolor: 'background.paper',
+              border: '2px solid #000',
+              boxShadow: 24,
+              p: 4,
+            }}
+          >
+            <Typography id="incomplete-data-modal" variant="h6" component="h2">
+              ข้อมูลไม่ครบถ้วน
+            </Typography>
+            <Typography id="incomplete-data-description" sx={{ mt: 2 }}>
+              กรุณากรอกข้อมูลให้ครบถ้วนก่อนดำเนินการต่อ
+            </Typography>
+            <Button onClick={handleCloseModal} sx={{ mt: 2 }}>
+              ปิด
+            </Button>
+          </Box>
+        </Modal>
       </Container>
     </Box>
   );
