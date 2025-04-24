@@ -75,22 +75,6 @@ export default function Home() {
 
       <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 1 }}>
         {/* Header */}
-        <Box sx={{ pt: 4, pb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Typography
-            variant="h4"
-            component="h1"
-            sx={{
-              fontWeight: 700,
-              background: `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-            }}
-          >
-            BizSense
-          </Typography>
-          <ThemeToggle />
-        </Box>
-
         {/* Hero Section */}
         <MotionBox
           initial={{ opacity: 0, y: 20 }}
@@ -123,7 +107,6 @@ export default function Home() {
           >
             <MotionTypography
               variant="h2"
-              component="h2"
               sx={{
                 fontWeight: 800,
                 mb: 3,
