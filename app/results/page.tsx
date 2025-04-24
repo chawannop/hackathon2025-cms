@@ -1,107 +1,898 @@
 'use client';
 
 import React from 'react';
-import { useRouter } from 'next/navigation';
+import {
+  Box,
+  Container,
+  Typography,
+  Paper,
+  Grid,
+  Card,
+  CardContent,
+  CardHeader,
+  useTheme,
+  alpha,
+  LinearProgress,
+  Divider,
+  Alert,
+  AlertTitle,
+  List,
+  ListItem,
+  ListItemText,
+  CircularProgress,
+} from '@mui/material';
+import { ThemeToggle } from '@/components/ThemeToggle';
+import TrendingUpIcon from '@mui/icons-material/TrendingUp';
+import MonetizationOnIcon from '@mui/icons-material/MonetizationOn';
+import TimelineIcon from '@mui/icons-material/Timeline';
+import AssessmentIcon from '@mui/icons-material/Assessment';
+import AnalyticsIcon from '@mui/icons-material/Analytics';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  BarElement,
+  ArcElement,
+  Title,
+  Tooltip,
+  Legend,
+  ChartData,
+  ChartOptions
+} from 'chart.js';
+import { Line, Bar, Doughnut } from 'react-chartjs-2';
+import { calculateOverallScore, type BusinessInputs } from '@/lib/scoring';
+import { analyzeBusinessWithAI, type AIAnalysisResult } from '@/lib/aiScoring';
+import { motion } from 'framer-motion';
+import { LineChart, BarChart } from '@mui/x-charts';
+
+// Register ChartJS components
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  BarElement,
+  ArcElement,
+  Title,
+  Tooltip,
+  Legend
+);
+
+// Define chart data types
+interface MonthlyData {
+  labels: string[];
+  datasets: {
+    label: string;
+    data: number[];
+  }[];
+}
 
 export default function Results() {
-  const router = useRouter();
+  const theme = useTheme();
+  const [aiAnalysis, setAiAnalysis] = React.useState<AIAnalysisResult | null>(null);
+  const [isLoading, setIsLoading] = React.useState(true);
 
-  // ข้อมูลตัวอย่าง (ในอนาคตจะมาจาก API)
-  const results = {
-    score: 75,
-    feedback: [
-      "จุดแข็ง: มีความชัดเจนในกลุ่มลูกค้าเป้าหมาย",
-      "ควรปรับปรุง: ควรเพิ่มช่องทางการตลาดให้หลากหลายขึ้น",
-      "คำแนะนำ: ควรศึกษาคู่แข่งให้ละเอียดขึ้น",
+  const sampleInputs: BusinessInputs = {
+    // Business Information
+    businessName: "Café Artisan",
+    businessType: "ร้านกาแฟพรีเมียม",
+    
+    // Market Analysis Inputs
+    marketSize: 5,
+    competitorCount: 3,
+    targetCustomerCount: 500,
+    locationScore: 8,
+    
+    // Financial Inputs
+    initialInvestment: 500000,
+    monthlyRevenue: 150000,
+    monthlyCost: 90000,
+    breakEvenMonths: 8.33,
+    
+    // Operational Inputs
+    staffCount: 4,
+    openingHours: 12,
+    menuItems: 15,
+    equipmentQuality: 8,
+  };
+
+  const initialScores = calculateOverallScore(sampleInputs);
+  const [scores, setScores] = React.useState(initialScores);
+  
+  const [mockData, setMockData] = React.useState({
+    businessName: sampleInputs.businessName,
+    investmentAmount: sampleInputs.initialInvestment,
+    monthlyRevenue: sampleInputs.monthlyRevenue,
+    monthlyCost: sampleInputs.monthlyCost,
+    monthlyProfit: sampleInputs.monthlyRevenue - sampleInputs.monthlyCost,
+    breakEvenMonths: sampleInputs.breakEvenMonths,
+    roi: ((sampleInputs.monthlyRevenue - sampleInputs.monthlyCost) / sampleInputs.initialInvestment) * 100,
+    marketScore: initialScores.marketScore,
+    financialScore: initialScores.financialScore,
+    operationalScore: initialScores.operationalScore,
+    overallScore: Math.round(
+      (initialScores.marketScore * 0.35) +
+      (initialScores.financialScore * 0.40) +
+      (initialScores.operationalScore * 0.25)
+    ),
+  });
+
+  React.useEffect(() => {
+    const fetchAIAnalysis = async () => {
+      try {
+        const analysis = await analyzeBusinessWithAI(sampleInputs, {
+          marketScore: scores.marketScore,
+          financialScore: scores.financialScore,
+          operationalScore: scores.operationalScore
+        });
+        setAiAnalysis(analysis);
+        if (analysis?.adjustedScores) {
+          setMockData(prev => ({
+            ...prev,
+            marketScore: analysis.adjustedScores.marketScore,
+            financialScore: analysis.adjustedScores.financialScore,
+            operationalScore: analysis.adjustedScores.operationalScore,
+            overallScore: Math.round(
+              (analysis.adjustedScores.marketScore * 0.35) +
+              (analysis.adjustedScores.financialScore * 0.40) +
+              (analysis.adjustedScores.operationalScore * 0.25)
+            ),
+          }));
+        }
+      } catch (error) {
+        console.error('Error fetching AI analysis:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchAIAnalysis();
+  }, [scores]);
+
+  // Monthly projection data
+  const monthlyData: MonthlyData = {
+    labels: ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.'],
+    datasets: [
+      {
+        label: 'รายได้',
+        data: [30000, 35000, 40000, 45000, 50000, 55000],
+      },
+      {
+        label: 'รายจ่าย',
+        data: [25000, 28000, 32000, 35000, 38000, 42000],
+      },
     ],
-    suggestions: [
-      "ควรทำการสำรวจตลาดเพิ่มเติม",
-      "ควรวางแผนการเงินให้ละเอียดขึ้น",
-      "ควรเตรียมแผนสำรองกรณีเกิดปัญหา",
-    ]
+  };
+
+  // Score breakdown data
+  const scoreData: ChartData<'doughnut'> = {
+    labels: ['การตลาด', 'การเงิน', 'การดำเนินงาน'],
+    datasets: [
+      {
+        data: [mockData.marketScore, mockData.financialScore, mockData.operationalScore],
+        backgroundColor: [
+          alpha(theme.palette.primary.main, 0.8),
+          alpha(theme.palette.secondary.main, 0.8),
+          alpha(theme.palette.success.main, 0.8),
+        ],
+        borderColor: [
+          theme.palette.primary.main,
+          theme.palette.secondary.main,
+          theme.palette.success.main,
+        ],
+        borderWidth: 1,
+      },
+    ],
+  };
+
+  // ROI Projection data
+  const roiData: ChartData<'bar'> = {
+    labels: ['ปีที่ 1', 'ปีที่ 2', 'ปีที่ 3'],
+    datasets: [
+      {
+        label: 'ผลตอบแทนการลงทุน (%)',
+        data: [mockData.roi, mockData.roi * 1.5, mockData.roi * 2],
+        backgroundColor: alpha(theme.palette.primary.main, 0.8),
+      },
+    ],
+  };
+
+  const lineChartOptions = {
+    responsive: true,
+    plugins: {
+      legend: {
+        position: 'top' as const,
+        display: true,
+      },
+      title: {
+        display: true,
+        text: 'Financial Projections',
+        color: theme.palette.common.white,
+      },
+    },
+    scales: {
+      x: {
+        grid: {
+          color: alpha(theme.palette.common.white, 0.15),
+        },
+        ticks: {
+          color: theme.palette.common.white,
+        },
+      },
+      y: {
+        grid: {
+          color: alpha(theme.palette.common.white, 0.15),
+        },
+        ticks: {
+          color: theme.palette.common.white,
+        },
+      },
+    },
+  };
+
+  const barChartOptions = {
+    responsive: true,
+    plugins: {
+      legend: {
+        position: 'top' as const,
+        display: true,
+      },
+      title: {
+        display: true,
+        text: 'ROI Projections',
+        color: theme.palette.common.white,
+      },
+    },
+    scales: {
+      x: {
+        grid: {
+          color: alpha(theme.palette.common.white, 0.15),
+        },
+        ticks: {
+          color: theme.palette.common.white,
+        },
+      },
+      y: {
+        grid: {
+          color: alpha(theme.palette.common.white, 0.15),
+        },
+        ticks: {
+          color: theme.palette.common.white,
+        },
+      },
+    },
+  };
+
+  const fadeIn = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0 }
   };
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-blue-50 to-white py-12">
-      <div className="container mx-auto px-4">
-        <div className="max-w-3xl mx-auto">
-          <h1 className="text-4xl font-bold text-gray-800 mb-8 text-center">
-            ผลการประเมินไอเดียธุรกิจ
-          </h1>
-
-          {/* Score Card */}
-          <div className="bg-white rounded-xl shadow-xl p-6 mb-8">
-            <h2 className="text-2xl font-semibold text-center mb-4">คะแนนความเหมาะสม</h2>
-            <div className="flex flex-col items-center space-y-4">
-              <div className="w-full max-w-md bg-gray-200 rounded-full h-2.5">
-                <div 
-                  className="bg-blue-600 h-2.5 rounded-full" 
-                  style={{ width: `${results.score}%` }}
-                ></div>
-              </div>
-              <div className="text-4xl font-bold text-blue-600">{results.score}%</div>
-            </div>
-          </div>
-
-          {/* Feedback Card */}
-          <div className="bg-white rounded-xl shadow-xl p-6 mb-8">
-            <h2 className="text-xl font-semibold mb-4 flex items-center">
-              <svg className="w-6 h-6 text-blue-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              ข้อเสนอแนะ
-            </h2>
-            <ul className="space-y-3">
-              {results.feedback.map((item, index) => (
-                <li key={index} className="flex items-start p-3 rounded-lg bg-gray-50">
-                  <span className="text-blue-500 mr-2 mt-1">•</span>
-                  <span className="text-gray-700">{item}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Suggestions Card */}
-          <div className="bg-white rounded-xl shadow-xl p-6 mb-8">
-            <h2 className="text-xl font-semibold mb-4 flex items-center">
-              <svg className="w-6 h-6 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-              </svg>
-              คำแนะนำเพิ่มเติม
-            </h2>
-            <ul className="space-y-3">
-              {results.suggestions.map((item, index) => (
-                <li key={index} className="flex items-start p-3 rounded-lg bg-gray-50">
-                  <span className="text-green-500 mr-2 mt-1">•</span>
-                  <span className="text-gray-700">{item}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Buttons */}
-          <div className="flex justify-center space-x-4">
-            <button
-              onClick={() => router.push('/')}
-              className="px-6 py-3 bg-gray-100 text-gray-800 rounded-lg hover:bg-gray-200 transition duration-300 flex items-center"
+    <Box
+      component="main"
+      sx={{
+        flexGrow: 1,
+        py: 8,
+        minHeight: '100vh',
+        background: 'linear-gradient(45deg, #000000 30%, #1a1a1a 90%)',
+        position: 'relative',
+        '&::before': {
+          content: '""',
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'radial-gradient(circle at center, rgba(255,255,255,0.1) 0%, rgba(0,0,0,0) 70%)',
+          pointerEvents: 'none'
+        }
+      }}
+    >
+      <Container maxWidth="lg">
+        <motion.div
+          initial="hidden"
+          animate="visible"
+          variants={fadeIn}
+          transition={{ duration: 0.6 }}
+        >
+          <Box sx={{ mb: 6, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Typography 
+              variant="h3" 
+              component="h1" 
+              sx={{ 
+                fontWeight: 800,
+                background: `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                textShadow: '0 0 30px rgba(159, 122, 234, 0.3)',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 2
+              }}
             >
-              <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-              </svg>
-              กลับหน้าหลัก
-            </button>
-            <button
-              onClick={() => router.push('/evaluate')}
-              className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition duration-300 flex items-center"
+              <AnalyticsIcon sx={{ fontSize: 40 }} />
+              ผลการวิเคราะห์ธุรกิจ
+            </Typography>
+            <ThemeToggle />
+          </Box>
+          <Typography 
+            variant="h5" 
+            sx={{ 
+              color: 'rgba(255, 255, 255, 0.7)',
+              mb: 4,
+              textAlign: 'center'
+            }}
+          >
+            {mockData.businessName}
+          </Typography>
+        </motion.div>
+
+        <motion.div
+          initial="hidden"
+          animate="visible"
+          variants={fadeIn}
+          transition={{ duration: 0.8, delay: 0.2 }}
+        >
+          <Card
+            sx={{
+              mb: 4,
+              background: 'rgba(255, 255, 255, 0.03)',
+              backdropFilter: 'blur(20px)',
+              border: '1px solid rgba(255, 255, 255, 0.1)',
+              borderRadius: '16px',
+              '&::before': {
+                content: '""',
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                height: '4px',
+                background: `linear-gradient(90deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
+              }
+            }}
+          >
+            <CardContent>
+              <Grid container spacing={3} alignItems="center">
+                <Grid item xs={12} md={6}>
+                  <Typography variant="h6" sx={{ 
+                    color: 'rgba(255, 255, 255, 0.9)',
+                    mb: 3,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 1
+                  }}>
+                    <AssessmentIcon />
+                    คะแนนรวมการประเมิน
+                  </Typography>
+                  <Box sx={{ position: 'relative', mb: 2 }}>
+                    <LinearProgress
+                      variant="determinate"
+                      value={mockData.overallScore}
+                      sx={{
+                        height: 24,
+                        borderRadius: 2,
+                        backgroundColor: alpha(theme.palette.primary.main, 0.1),
+                        '& .MuiLinearProgress-bar': {
+                          background: `linear-gradient(90deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
+                          transition: 'transform 1s ease-in-out',
+                        },
+                      }}
+                    />
+                    <Typography
+                      variant="h6"
+                      sx={{
+                        position: 'absolute',
+                        right: 10,
+                        top: '50%',
+                        transform: 'translateY(-50%)',
+                        color: 'white',
+                        fontWeight: 'bold',
+                        textShadow: '0 0 10px rgba(0,0,0,0.5)'
+                      }}
+                    >
+                      {mockData.overallScore}%
+                    </Typography>
+                  </Box>
+                </Grid>
+                <Grid item xs={12} md={6}>
+                  <Box sx={{ height: 200 }}>
+                    <motion.div 
+                      initial={{ scale: 0.8, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      transition={{ duration: 0.5, delay: 0.3 }}
+                    >
+                      <Doughnut data={scoreData} options={{
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                          legend: {
+                            position: 'bottom',
+                            labels: {
+                              color: 'rgba(255,255,255,0.8)',
+                              font: {
+                                size: 12
+                              }
+                            }
+                          }
+                        }
+                      }} />
+                    </motion.div>
+                  </Box>
+                </Grid>
+              </Grid>
+
+              <Divider sx={{ my: 3, borderColor: 'rgba(255, 255, 255, 0.1)' }} />
+              
+              <Grid container spacing={3}>
+                <Grid item xs={12}>
+                  <Typography variant="h6" sx={{ color: 'white', mb: 2 }}>
+                    คำอธิบายคะแนน
+                  </Typography>
+                </Grid>
+                <Grid item xs={12} md={4}>
+                  <Box sx={{ 
+                    p: 3, 
+                    backgroundColor: alpha(theme.palette.primary.main, 0.1), 
+                    borderRadius: 2,
+                    height: '100%',
+                    minHeight: 280,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'space-between'
+                  }}>
+                    <Box>
+                      <Typography variant="subtitle1" sx={{ color: theme.palette.primary.main, mb: 2, fontWeight: 'bold' }}>
+                        ด้านการตลาด (35%)
+                      </Typography>
+                      <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.7)', lineHeight: 2 }}>
+                        • ขนาดตลาด (30%)<br/>
+                        • จำนวนคู่แข่ง (25%)<br/>
+                        • ฐานลูกค้าเป้าหมาย (25%)<br/>
+                        • คะแนนทำเลที่ตั้ง (20%)
+                      </Typography>
+                    </Box>
+                    <Typography variant="h6" sx={{ color: theme.palette.primary.main, mt: 2, textAlign: 'right', borderTop: 1, borderColor: 'rgba(255, 255, 255, 0.1)', pt: 2 }}>
+                      รวม: {mockData.marketScore}%
+                    </Typography>
+                  </Box>
+                </Grid>
+                <Grid item xs={12} md={4}>
+                  <Box sx={{ 
+                    p: 3, 
+                    backgroundColor: alpha(theme.palette.secondary.main, 0.1), 
+                    borderRadius: 2,
+                    height: '100%',
+                    minHeight: 280,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'space-between'
+                  }}>
+                    <Box>
+                      <Typography variant="subtitle1" sx={{ color: theme.palette.secondary.main, mb: 2, fontWeight: 'bold' }}>
+                        ด้านการเงิน (40%)
+                      </Typography>
+                      <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.7)', lineHeight: 2 }}>
+                        • ผลตอบแทนการลงทุนรายเดือน (30%)<br/>
+                        • ระยะเวลาคืนทุน (30%)<br/>
+                        • อัตรากำไร (40%)
+                      </Typography>
+                    </Box>
+                    <Typography variant="h6" sx={{ color: theme.palette.secondary.main, mt: 2, textAlign: 'right', borderTop: 1, borderColor: 'rgba(255, 255, 255, 0.1)', pt: 2 }}>
+                      รวม: {mockData.financialScore}%
+                    </Typography>
+                  </Box>
+                </Grid>
+                <Grid item xs={12} md={4}>
+                  <Box sx={{ 
+                    p: 3, 
+                    backgroundColor: alpha(theme.palette.success.main, 0.1), 
+                    borderRadius: 2,
+                    height: '100%',
+                    minHeight: 280,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'space-between'
+                  }}>
+                    <Box>
+                      <Typography variant="subtitle1" sx={{ color: theme.palette.success.main, mb: 2, fontWeight: 'bold' }}>
+                        ด้านการดำเนินงาน (25%)
+                      </Typography>
+                      <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.7)', lineHeight: 2 }}>
+                        • ประสิทธิภาพพนักงาน (25%)<br/>
+                        • ชั่วโมงการทำงาน (25%)<br/>
+                        • ความหลากหลายของเมนู (25%)<br/>
+                        • คุณภาพอุปกรณ์ (25%)
+                      </Typography>
+                    </Box>
+                    <Typography variant="h6" sx={{ color: theme.palette.success.main, mt: 2, textAlign: 'right', borderTop: 1, borderColor: 'rgba(255, 255, 255, 0.1)', pt: 2 }}>
+                      รวม: {mockData.operationalScore}%
+                    </Typography>
+                  </Box>
+                </Grid>
+              </Grid>
+            </CardContent>
+          </Card>
+        </motion.div>
+
+        <Grid container spacing={4}>
+          <Grid item xs={12}>
+            <motion.div
+              initial="hidden"
+              animate="visible"
+              variants={fadeIn}
+              transition={{ duration: 0.8, delay: 0.4 }}
             >
-              <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-              </svg>
-              ประเมินไอเดียใหม่
-            </button>
-          </div>
-        </div>
-      </div>
-    </main>
+              <Card
+                sx={{
+                  background: 'rgba(255, 255, 255, 0.03)',
+                  backdropFilter: 'blur(20px)',
+                  border: '1px solid rgba(255, 255, 255, 0.1)',
+                  borderRadius: '16px',
+                }}
+              >
+                <CardHeader
+                  avatar={
+                    <Box
+                      sx={{
+                        width: 48,
+                        height: 48,
+                        borderRadius: '12px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        background: `linear-gradient(135deg, ${alpha(theme.palette.primary.main, 0.2)}, ${alpha(theme.palette.primary.main, 0.3)})`,
+                      }}
+                    >
+                      <TimelineIcon sx={{ color: theme.palette.primary.main }} />
+                    </Box>
+                  }
+                  title={
+                    <Typography variant="h6" sx={{ color: 'white' }}>
+                      การคาดการณ์รายรับ-รายจ่าย 12 เดือน
+                    </Typography>
+                  }
+                />
+                <CardContent>
+                  <Box sx={{ height: 300, p: 2 }}>
+                    <motion.div 
+                      initial={{ x: -20, opacity: 0 }}
+                      animate={{ x: 0, opacity: 1 }}
+                      transition={{ duration: 0.5, delay: 0.5 }}
+                    >
+                      <LineChart
+                        xAxis={[{ 
+                          data: monthlyData.labels,
+                          scaleType: 'band',
+                        }]}
+                        yAxis={[{ 
+                          min: 0,
+                          max: Math.max(...monthlyData.datasets[0].data) * 1.2,
+                        }]}
+                        series={[
+                          {
+                            data: monthlyData.datasets[0].data,
+                            label: monthlyData.datasets[0].label,
+                            color: theme.palette.primary.main,
+                          },
+                          {
+                            data: monthlyData.datasets[1].data,
+                            label: monthlyData.datasets[1].label,
+                            color: theme.palette.secondary.main,
+                          }
+                        ]}
+                        height={300}
+                        width={600}
+                      />
+                    </motion.div>
+                  </Box>
+                </CardContent>
+              </Card>
+            </motion.div>
+          </Grid>
+
+          {/* ROI Projection */}
+          <Grid item xs={12} md={6}>
+            <motion.div
+              initial="hidden"
+              animate="visible"
+              variants={fadeIn}
+              transition={{ duration: 0.8, delay: 0.6 }}
+            >
+              <Card
+                sx={{
+                  height: '100%',
+                  background: 'rgba(255, 255, 255, 0.03)',
+                  backdropFilter: 'blur(20px)',
+                  border: '1px solid rgba(255, 255, 255, 0.1)',
+                  borderRadius: '16px',
+                }}
+              >
+                <CardHeader
+                  avatar={
+                    <Box
+                      sx={{
+                        width: 48,
+                        height: 48,
+                        borderRadius: '12px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        background: `linear-gradient(135deg, ${alpha(theme.palette.secondary.main, 0.2)}, ${alpha(theme.palette.secondary.main, 0.3)})`,
+                      }}
+                    >
+                      <TrendingUpIcon sx={{ color: theme.palette.secondary.main }} />
+                    </Box>
+                  }
+                  title={
+                    <Typography variant="h6" sx={{ color: 'white' }}>
+                      ผลตอบแทนการลงทุน (ROI)
+                    </Typography>
+                  }
+                />
+                <CardContent>
+                  <Box sx={{ height: 250 }}>
+                    <BarChart
+                      xAxis={[{ 
+                        data: ['ด้านการเงิน', 'ด้านการตลาด', 'ด้านการดำเนินงาน', 'ด้านความเสี่ยง'],
+                        scaleType: 'band',
+                      }]}
+                      yAxis={[{ 
+                        min: 0,
+                        max: 100,
+                      }]}
+                      series={[{
+                        data: [mockData.financialScore, mockData.marketScore, mockData.operationalScore, 0],
+                        color: theme.palette.primary.main,
+                      }]}
+                      height={300}
+                      width={600}
+                    />
+                  </Box>
+                </CardContent>
+              </Card>
+            </motion.div>
+          </Grid>
+
+          {/* Key Metrics */}
+          <Grid item xs={12} md={6}>
+            <motion.div
+              initial="hidden"
+              animate="visible"
+              variants={fadeIn}
+              transition={{ duration: 0.8, delay: 0.8 }}
+            >
+              <Card
+                sx={{
+                  height: '100%',
+                  background: 'rgba(255, 255, 255, 0.03)',
+                  backdropFilter: 'blur(20px)',
+                  border: '1px solid rgba(255, 255, 255, 0.1)',
+                  borderRadius: '16px',
+                }}
+              >
+                <CardHeader
+                  avatar={
+                    <Box
+                      sx={{
+                        width: 48,
+                        height: 48,
+                        borderRadius: '12px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        background: `linear-gradient(135deg, ${alpha(theme.palette.success.main, 0.2)}, ${alpha(theme.palette.success.main, 0.3)})`,
+                      }}
+                    >
+                      <AssessmentIcon sx={{ color: theme.palette.success.main }} />
+                    </Box>
+                  }
+                  title={
+                    <Typography variant="h6" sx={{ color: 'white' }}>
+                      ตัวชี้วัดสำคัญ
+                    </Typography>
+                  }
+                />
+                <CardContent>
+                  <Grid container spacing={2}>
+                    <Grid item xs={12}>
+                      <Typography variant="subtitle1" sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>
+                        เงินลงทุนเริ่มต้น
+                      </Typography>
+                      <Typography variant="h5" sx={{ color: 'white' }}>
+                        {mockData.investmentAmount.toLocaleString()} บาท
+                      </Typography>
+                    </Grid>
+                    <Grid item xs={12}>
+                      <Divider sx={{ my: 1, borderColor: 'rgba(255, 255, 255, 0.1)' }} />
+                    </Grid>
+                    <Grid item xs={12}>
+                      <Typography variant="subtitle1" sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>
+                        รายได้ต่อเดือน (เฉลี่ย)
+                      </Typography>
+                      <Typography variant="h5" sx={{ color: 'white' }}>
+                        {mockData.monthlyRevenue.toLocaleString()} บาท
+                      </Typography>
+                    </Grid>
+                    <Grid item xs={12}>
+                      <Divider sx={{ my: 1, borderColor: 'rgba(255, 255, 255, 0.1)' }} />
+                    </Grid>
+                    <Grid item xs={12}>
+                      <Typography variant="subtitle1" sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>
+                        กำไรต่อเดือน (เฉลี่ย)
+                      </Typography>
+                      <Typography variant="h5" sx={{ color: 'white' }}>
+                        {mockData.monthlyProfit.toLocaleString()} บาท
+                      </Typography>
+                    </Grid>
+                    <Grid item xs={12}>
+                      <Divider sx={{ my: 1, borderColor: 'rgba(255, 255, 255, 0.1)' }} />
+                    </Grid>
+                    <Grid item xs={12}>
+                      <Typography variant="subtitle1" sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>
+                        ระยะเวลาคืนทุน
+                      </Typography>
+                      <Typography variant="h5" sx={{ color: 'white' }}>
+                        {Math.ceil(mockData.breakEvenMonths)} เดือน
+                      </Typography>
+                    </Grid>
+                  </Grid>
+                </CardContent>
+              </Card>
+            </motion.div>
+          </Grid>
+        </Grid>
+
+        {/* AI Analysis Section with animations */}
+        <motion.div
+          initial="hidden"
+          animate="visible"
+          variants={fadeIn}
+          transition={{ duration: 0.8, delay: 1 }}
+        >
+          <Grid container spacing={4} sx={{ mt: 4 }}>
+            <Grid item xs={12}>
+              <Card
+                sx={{
+                  background: 'rgba(255, 255, 255, 0.03)',
+                  backdropFilter: 'blur(20px)',
+                  border: '1px solid rgba(255, 255, 255, 0.1)',
+                  borderRadius: '16px',
+                }}
+              >
+                <CardHeader
+                  title={
+                    <Typography variant="h6" sx={{ color: 'white' }}>
+                      การวิเคราะห์เชิงลึกด้วย AI
+                    </Typography>
+                  }
+                />
+                <CardContent>
+                  {isLoading ? (
+                    <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
+                      <CircularProgress />
+                    </Box>
+                  ) : aiAnalysis ? (
+                    <Grid container spacing={3}>
+                      {/* Recommendations */}
+                      <Grid item xs={12} md={4}>
+                        <Alert severity="info" sx={{ mb: 2, backgroundColor: 'rgba(2, 136, 209, 0.1)' }}>
+                          <AlertTitle>คำแนะนำในการปรับปรุง</AlertTitle>
+                          <List>
+                            {aiAnalysis.recommendations.map((rec, index) => (
+                              <ListItem key={index}>
+                                <ListItemText primary={rec} sx={{ color: 'white' }} />
+                              </ListItem>
+                            ))}
+                          </List>
+                        </Alert>
+                      </Grid>
+
+                      {/* Risk Factors */}
+                      <Grid item xs={12} md={4}>
+                        <Alert severity="warning" sx={{ mb: 2, backgroundColor: 'rgba(237, 108, 2, 0.1)' }}>
+                          <AlertTitle>ปัจจัยเสี่ยงที่ต้องระวัง</AlertTitle>
+                          <List>
+                            {aiAnalysis.riskFactors.map((risk, index) => (
+                              <ListItem key={index}>
+                                <ListItemText primary={risk} sx={{ color: 'white' }} />
+                              </ListItem>
+                            ))}
+                          </List>
+                        </Alert>
+                      </Grid>
+
+                      {/* Opportunities */}
+                      <Grid item xs={12} md={4}>
+                        <Alert severity="success" sx={{ mb: 2, backgroundColor: 'rgba(46, 125, 50, 0.1)' }}>
+                          <AlertTitle>โอกาสในการเติบโต</AlertTitle>
+                          <List>
+                            {aiAnalysis.opportunities.map((opp, index) => (
+                              <ListItem key={index}>
+                                <ListItemText primary={opp} sx={{ color: 'white' }} />
+                              </ListItem>
+                            ))}
+                          </List>
+                        </Alert>
+                      </Grid>
+                    </Grid>
+                  ) : (
+                    <Alert severity="error" sx={{ backgroundColor: 'rgba(211, 47, 47, 0.1)' }}>
+                      <AlertTitle>ไม่สามารถวิเคราะห์ได้</AlertTitle>
+                      เกิดข้อผิดพลาดในการวิเคราะห์ด้วย AI กรุณาลองใหม่อีกครั้ง
+                    </Alert>
+                  )}
+                </CardContent>
+              </Card>
+            </Grid>
+          </Grid>
+        </motion.div>
+
+        {/* Score Explanation Card */}
+        <Grid item xs={12}>
+          <motion.div
+            initial="hidden"
+            animate="visible"
+            variants={fadeIn}
+            transition={{ duration: 0.8, delay: 0.9 }}
+          >
+            <Card
+              sx={{
+                background: 'rgba(255, 255, 255, 0.03)',
+                backdropFilter: 'blur(20px)',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+                borderRadius: '16px',
+              }}
+            >
+              <CardHeader
+                title={
+                  <Typography variant="h6" sx={{ color: 'white' }}>
+                    วิธีการคำนวณคะแนน
+                  </Typography>
+                }
+              />
+              <CardContent>
+                <Grid container spacing={3}>
+                  <Grid item xs={12} md={4}>
+                    <Typography variant="subtitle1" sx={{ color: 'white', mb: 1 }}>
+                      ด้านการตลาด (35%)
+                    </Typography>
+                    <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>
+                      • ขนาดตลาด (30%)<br/>
+                      • จำนวนคู่แข่ง (25%)<br/>
+                      • ฐานลูกค้าเป้าหมาย (25%)<br/>
+                      • คะแนนทำเลที่ตั้ง (20%)
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={12} md={4}>
+                    <Typography variant="subtitle1" sx={{ color: 'white', mb: 1 }}>
+                      ด้านการเงิน (40%)
+                    </Typography>
+                    <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>
+                      • ผลตอบแทนการลงทุนรายเดือน (30%)<br/>
+                      • ระยะเวลาคืนทุน (30%)<br/>
+                      • อัตรากำไร (40%)
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={12} md={4}>
+                    <Typography variant="subtitle1" sx={{ color: 'white', mb: 1 }}>
+                      ด้านการดำเนินงาน (25%)
+                    </Typography>
+                    <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>
+                      • ประสิทธิภาพพนักงาน (25%)<br/>
+                      • ชั่วโมงการทำงาน (25%)<br/>
+                      • ความหลากหลายของเมนู (25%)<br/>
+                      • คุณภาพอุปกรณ์ (25%)
+                    </Typography>
+                  </Grid>
+                </Grid>
+              </CardContent>
+            </Card>
+          </motion.div>
+        </Grid>
+      </Container>
+    </Box>
   );
 } 
